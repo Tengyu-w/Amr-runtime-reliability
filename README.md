@@ -403,6 +403,21 @@ Launch flag:
 enable_recovery_executor:=true
 ```
 
+For presentation, the recovery videos are intentionally ordered as a research
+process:
+
+| Step | Video | What it shows |
+| --- | --- | --- |
+| 1 | `closed_loop_replan_recovery_demo.gif` | Conceptual route logic: blocked original route, route decision, replanned path. |
+| 2 | `gazebo_nav2_closed_loop_recovery_execution.gif` | Route decision connected to Nav2-facing executor actions; not yet goal success. |
+| 3 | `closed_loop_recovery_supervisor_story.gif` | Readable closed-loop story for supervisors: blockage, diagnosis, `REPLAN`, recovered path, goal reached. |
+
+![Closed-loop recovery supervisor story](visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif)
+
+The third video is the most useful short presentation clip. It is a lightweight
+closed-loop demonstration, not a real-robot or full Gazebo recovery-success
+benchmark.
+
 ## Claim-To-Evidence Index
 
 | Claim | Evidence | Source |
@@ -415,6 +430,7 @@ enable_recovery_executor:=true
 | Policy errors are structured. | High-confidence residuals concentrate in perception axis confusion and blocked-path direction errors. | `visualizations/evidence/policy_routes/high_conf_error_patterns.csv` |
 | Recovery routes can be mechanism-specific. | Residual mechanisms map to `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, and `HUMAN_REVIEW`. | `visualizations/evidence/policy_routes/recovery_route_evidence.csv` |
 | Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the smoke run recorded 6 published `REPLAN` goal reissues. | `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
+| A recovery story can be visualized end to end for presentation. | The supervisor-facing closed-loop video shows blockage, diagnosis, `REPLAN`, replanned route, and goal reached in the lightweight simulator. | `visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif`, `visualizations/recovery_route/supervisor_recovery_story_manifest.csv` |
 
 ## Repository Map
 
@@ -494,7 +510,9 @@ The repository shows that:
 - policy residual errors are structured by disturbance type;
 - different residual mechanisms can be routed to different recovery families;
 - `REPLAN` route decisions can be executed as Nav2 goal reissues in a headless
-  Gazebo/Nav2 smoke run.
+  Gazebo/Nav2 smoke run;
+- the recovery process can be shown as a readable closed-loop presentation
+  video in the lightweight simulator.
 
 ## What Remains Unproven
 
@@ -528,4 +546,6 @@ benchmark:
   safety controller.
 - The current recovery executor smoke test proves route-to-Nav2 action
   connection, not final navigation success.
+- The supervisor-facing recovery video is a clear lightweight closed-loop
+  demonstration, not a full Gazebo/Nav2 success benchmark.
 - Hardware-facing robot control is outside the scope of this repository.
