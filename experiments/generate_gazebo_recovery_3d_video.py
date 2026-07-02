@@ -136,8 +136,10 @@ def _draw_3d_scene(
     ax.set_facecolor("#f5f2ea")
 
     _draw_floor(ax)
-    _draw_shelf(ax, (-2.5, 0.0, 0.5), (0.4, 5.5, 1.0))
-    _draw_shelf(ax, (2.5, 0.0, 0.5), (0.4, 5.5, 1.0))
+    _draw_shelf(ax, (-2.5, 0.0, 0.35), (0.28, 5.5, 0.7))
+    _draw_shelf(ax, (2.5, 0.0, 0.35), (0.28, 5.5, 0.7))
+    ax.text(-2.65, -2.75, 0.82, "warehouse shelf boundary", color="#5f666d", fontsize=8)
+    ax.text(2.08, -2.75, 0.82, "warehouse shelf boundary", color="#5f666d", fontsize=8)
     _draw_blocked_corridor(ax, row, history)
 
     ax.plot(history["robot_x"], history["robot_y"], np.full(len(history), 0.08), color="#0b4fa3", linewidth=3)
@@ -174,7 +176,7 @@ def _draw_3d_scene(
         0.02,
         0.97,
         (
-            "REPLAN trigger: external blockage signal "
+            "REPLAN trigger: visualized external blockage signal "
             f"path_blocked_score={float(row['path_blocked_score']):.2f}"
         ),
         transform=ax.transAxes,
@@ -194,7 +196,7 @@ def _draw_floor(ax: plt.Axes) -> None:
 
 
 def _draw_shelf(ax: plt.Axes, center: tuple[float, float, float], size: tuple[float, float, float]) -> None:
-    _add_box(ax, center, size, facecolor="#55585f", alpha=0.72)
+    _add_box(ax, center, size, facecolor="#9aa0a6", alpha=0.32)
 
 
 def _draw_blocked_corridor(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) -> None:
@@ -222,7 +224,7 @@ def _draw_blocked_corridor(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) 
     _add_oriented_box(
         ax,
         center=(float(center[0]), float(center[1]), 0.45),
-        size=(0.16, 1.95, 0.9),
+        size=(0.18, 1.25, 0.9),
         yaw=yaw,
         facecolor="#d62728",
         alpha=0.58,
@@ -230,7 +232,7 @@ def _draw_blocked_corridor(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) 
     _add_oriented_box(
         ax,
         center=(float(center[0]), float(center[1]), 0.035),
-        size=(1.15, 2.15, 0.05),
+        size=(0.9, 1.45, 0.05),
         yaw=yaw,
         facecolor="#d62728",
         alpha=0.18,
@@ -239,7 +241,7 @@ def _draw_blocked_corridor(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) 
         float(center[0]) + 0.12,
         float(center[1]) + 0.12,
         1.15,
-        "injected blocked corridor\nREPLAN source signal",
+        "injected blockage volume\nREPLAN source signal",
         color="#8f1d1d",
         fontsize=9,
         weight="bold",
@@ -254,7 +256,7 @@ def _draw_dynamic_obstacle(ax: plt.Axes, center: tuple[float, float]) -> None:
     x = center[0] + radius * np.cos(theta_grid)
     y = center[1] + radius * np.sin(theta_grid)
     ax.plot_surface(x, y, z_grid, color="#d62728", alpha=0.55, linewidth=0)
-    ax.text(center[0] + 0.28, center[1], 0.78, "dynamic\nobstacle", color="#8f1d1d", fontsize=8)
+    ax.text(center[0] + 0.28, center[1], 0.78, "blockage\nsignal", color="#8f1d1d", fontsize=8)
 
 
 def _draw_amr(ax: plt.Axes, position: tuple[float, float], yaw: float) -> None:
@@ -262,14 +264,14 @@ def _draw_amr(ax: plt.Axes, position: tuple[float, float], yaw: float) -> None:
     _add_oriented_box(
         ax,
         center=(x, y, 0.20),
-        size=(0.72, 0.52, 0.28),
+        size=(0.48, 0.34, 0.22),
         yaw=yaw,
         facecolor="#0b4fa3",
         alpha=0.88,
     )
     front = np.array([math.cos(yaw), math.sin(yaw)])
-    ax.quiver(x, y, 0.42, front[0], front[1], 0.0, length=0.55, color="#00a6d6", linewidth=2)
-    ax.text(x, y, 0.62, "AMR", color="#0b4fa3", fontsize=9, weight="bold")
+    ax.quiver(x, y, 0.36, front[0], front[1], 0.0, length=0.38, color="#00a6d6", linewidth=2)
+    ax.text(x, y, 0.52, "AMR", color="#0b4fa3", fontsize=9, weight="bold")
 
 
 def _draw_lidar_rays(
@@ -368,8 +370,9 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "lidar rays and depth grid from sensors,",
         "orange markers where REPLAN was sent,",
         "and Nav2 goal success in stdout.",
-        "The red blockage is the overlay for",
-        "the injected external path-blockage signal.",
+        "The red blockage visualizes the",
+        "injected external path-blockage signal;",
+        "it is not a Gazebo collision model.",
     ]
     ax.text(0.0, 0.99, "\n".join(lines), va="top", ha="left", fontsize=9.6)
 
@@ -494,8 +497,8 @@ def _write_summary(
                 "source_dir": str(input_dir),
                 "description": (
                     "3D presentation video reconstructed from real ROS 2/Gazebo/Nav2 logs: "
-                    "AMR odometry, lidar rays, depth grid, route decisions, recovery executor, "
-                    "and Nav2 goal success."
+                    "scaled AMR odometry, lidar rays, depth grid, route decisions, recovery executor, "
+                    "Nav2 goal success, and a visualized injected path-blockage signal."
                 ),
                 "evidence_level": "3D Gazebo/Nav2 recovery-success validation visualization",
             }

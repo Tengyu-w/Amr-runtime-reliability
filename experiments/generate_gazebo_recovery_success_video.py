@@ -187,8 +187,8 @@ def _draw_blockage_overlay(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) 
         alpha=0.65,
         label="blocked direct route",
     )
-    no_go = _oriented_rectangle(center, (1.15, 2.05), yaw)
-    wall = _oriented_rectangle(center, (0.16, 1.85), yaw)
+    no_go = _oriented_rectangle(center, (0.9, 1.45), yaw)
+    wall = _oriented_rectangle(center, (0.18, 1.25), yaw)
     ax.add_patch(plt.Polygon(no_go, closed=True, facecolor="#cf2e2e", edgecolor="none", alpha=0.16, zorder=2))
     ax.add_patch(
         plt.Polygon(wall, closed=True, facecolor="#cf2e2e", edgecolor="#8f1d1d", alpha=0.62, zorder=3)
@@ -197,7 +197,7 @@ def _draw_blockage_overlay(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) 
     ax.text(
         center[0] + 0.08,
         center[1] + 0.08,
-        "external blockage\npath_blocked_score high",
+        "injected blockage\npath_blocked_score high",
         fontsize=8,
         color="#8f1d1d",
         weight="bold",
@@ -354,8 +354,9 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "This video uses real ROS 2/Gazebo logs:",
         "odom, lidar, depth, router decisions,",
         "recovery executor events, and Nav2 stdout.",
-        "The red blockage is the visual overlay for",
-        "the injected external path-blockage signal.",
+        "The red blockage visualizes the",
+        "injected external path-blockage signal;",
+        "it is not a Gazebo collision model.",
     ]
     ax.text(0.0, 0.99, "\n".join(lines), va="top", ha="left", fontsize=9.5)
 

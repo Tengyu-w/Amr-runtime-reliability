@@ -1,0 +1,2 @@
+artifact,frames,scenario,triggered_route,evidence_level,description
+closed_loop_recovery_mechanism_3d.gif,33,external_path_blockage,REPLAN,lightweight 3D closed-loop mechanism demo,"3D demonstration of the intended recovery chain: normal policy approach, stop before blocked route segment, REPLAN, detour around the external obstacle, and goal reached."
