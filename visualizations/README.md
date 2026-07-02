@@ -51,7 +51,32 @@ decision routing, not only path planning.
 
 ![Baseline vs supervisor](runtime_demo/baseline_vs_supervisor.png)
 
-## 4. Policy Accuracy By Modality
+## 4. Gazebo Sensor-Policy Playback
+
+These GIFs are reconstructed from recorded Gazebo/Nav2 episode CSV files. They
+are not screen recordings of the Gazebo window. They show the actual sensor
+features used by the policy pipeline: lidar scan bins, depth-grid cells, expert
+action, predicted action, confidence, risk score, residual mechanism, and
+recovery route.
+
+The selected playback episode is an `external_path_blockage` test episode with
+goal `east_south` and seed `18`.
+
+![Gazebo lidar scan policy episode](sensor_policy/gazebo_lidar_scan_policy_episode.gif)
+
+![Gazebo depth grid policy episode](sensor_policy/gazebo_depth_grid_policy_episode.gif)
+
+![Gazebo scan depth policy episode](sensor_policy/gazebo_scan_depth_policy_episode.gif)
+
+Source manifest:
+
+- `sensor_policy/sensor_policy_visualization_manifest.csv`
+
+Generation code:
+
+- `experiments/generate_sensor_policy_visualizations.py`
+
+## 5. Policy Accuracy By Modality
 
 This figure summarizes the held-out test accuracy for the policy variants. The
 comparison includes scan-only, depth-only, and scan+depth fusion policies.
@@ -70,7 +95,7 @@ Generation code:
 - `experiments/train_gazebo_fusion_policy.py`
 - `experiments/analyze_policy_residual_routes.py`
 
-## 5. High-Confidence Policy Errors
+## 6. High-Confidence Policy Errors
 
 This figure focuses on the residual errors that matter most for reliability:
 cases where the learned policy is wrong while still confident. These errors are
@@ -84,7 +109,7 @@ Source evidence:
 - `evidence/policy_routes/residual_mechanism_summary.csv`
 - `evidence/policy_routes/scenario_error_summary.csv`
 
-## 6. Recovery Route Distribution
+## 7. Recovery Route Distribution
 
 This figure shows how high-confidence residual errors are assigned to recovery
 families such as `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`,

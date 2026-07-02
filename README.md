@@ -99,11 +99,15 @@ The repository follows a mechanism-first sequence:
    -> compare scan-only, depth-only, and scan+depth fusion policies under the
       same held-out simulation split
 
-5. Residual mechanism analysis
+5. Sensor-policy playback visualization
+   -> show the actual recorded lidar bins, depth grid, policy decision,
+      confidence, risk score, mechanism, and route over time
+
+6. Residual mechanism analysis
    -> inspect high-confidence policy errors and identify structured failure
       mechanisms instead of treating every mistake as one generic failure
 
-6. Recovery-route prototype
+7. Recovery-route prototype
    -> map different residual mechanisms to different recovery families such as
       cautious replanning, replanning, relocalization, cautious mode, and human
       review
@@ -244,7 +248,38 @@ Evidence tables:
 - [modality_ablation_metrics.csv](visualizations/evidence/policy_routes/modality_ablation_metrics.csv)
 - [test_ablation_delta_vs_scan_baseline.csv](visualizations/evidence/policy_routes/test_ablation_delta_vs_scan_baseline.csv)
 
-## 5. Residual Mechanism Analysis: Why The Policy Is Wrong
+## 5. Sensor-Policy Playback: What The Policy Sees
+
+The repository also includes reconstructed GIFs from one held-out Gazebo/Nav2
+episode. These are not Gazebo screen recordings. They are generated from the
+recorded episode CSV files, so they visualize the same compact sensor features
+used by the policy pipeline.
+
+The selected episode is:
+
+```text
+scenario = external_path_blockage
+goal = east_south
+seed = 18
+```
+
+Visual evidence:
+
+![Gazebo lidar scan policy episode](visualizations/sensor_policy/gazebo_lidar_scan_policy_episode.gif)
+
+![Gazebo depth grid policy episode](visualizations/sensor_policy/gazebo_depth_grid_policy_episode.gif)
+
+![Gazebo scan depth policy episode](visualizations/sensor_policy/gazebo_scan_depth_policy_episode.gif)
+
+Source manifest:
+
+- [sensor_policy_visualization_manifest.csv](visualizations/sensor_policy/sensor_policy_visualization_manifest.csv)
+
+Generation code:
+
+- `experiments/generate_sensor_policy_visualizations.py`
+
+## 6. Residual Mechanism Analysis: Why The Policy Is Wrong
 
 The key result is not only which policy has the best aggregate score. The
 project asks where confident mistakes come from.
@@ -271,7 +306,7 @@ Evidence tables:
 - [residual_mechanism_summary.csv](visualizations/evidence/policy_routes/residual_mechanism_summary.csv)
 - [scenario_error_summary.csv](visualizations/evidence/policy_routes/scenario_error_summary.csv)
 
-## 6. Recovery Routing: From Error Mechanism To Action
+## 7. Recovery Routing: From Error Mechanism To Action
 
 After the residual mechanisms are identified, the project maps them to
 recovery-route families.
