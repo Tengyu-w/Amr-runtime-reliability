@@ -1,152 +1,134 @@
 # Mechanism-Aware AMR Runtime Reliability Routing
 
-This repository studies runtime reliability for warehouse autonomous mobile
-robots (AMRs) under simulated disturbances. The central problem is not ordinary
-path planning. The project asks why a navigation policy makes wrong movement
-decisions under blockage, perception degradation, and localization-style
-uncertainty, and how those residual policy errors can be routed to different
-recovery mechanisms.
-
-The project is inspired by a mechanism-aware ECG uncertainty pipeline:
+This repository is a research prototype for autonomous mobile robot (AMR)
+runtime reliability under simulated warehouse disturbances. The central
+question is not whether a robot can follow a path in a clean environment. The
+project asks:
 
 ```text
-train a task model
-  -> inspect its residual errors
-  -> identify structured failure mechanisms
-  -> build evidence-based recovery routes
+When a learned navigation policy makes a confident wrong decision,
+what kind of failure produced that error, and which recovery route should handle it?
 ```
 
-For AMR navigation, the corresponding chain is:
+The project follows a mechanism-aware structure:
 
 ```text
-Gazebo/Nav2 simulation
-  -> scan/depth observations
+Gazebo/Nav2 episodes
+  -> scan and depth observations
   -> Nav2-plan expert action labels
   -> supervised navigation policy
   -> high-confidence residual error analysis
-  -> recovery-route prototype
+  -> failure-mechanism diagnosis
+  -> route-specific recovery
+  -> Nav2-facing recovery execution evidence
 ```
 
 > Research prototype only. This repository is not a certified robot safety
-> system, is not validated on a real robot, and should not be used for
-> deployment or hardware control without separate engineering validation.
+> system, is not validated on a real robot, and must not be used for hardware
+> deployment without separate engineering validation.
 
-## For Supervisors: Read These 4 Files First
+## For Supervisors: Read These First
 
 This repository preserves the full research trail. For a fast review, start
-here:
+with these files:
 
-1. [Project narrative](docs/AMR_RELIABILITY_PROJECT_NARRATIVE.md):
-   the complete story from simulation data to policy learning and recovery
-   routing.
-2. [Chinese project narrative](docs/AMR_RELIABILITY_PROJECT_NARRATIVE_CN.md):
-   a Chinese thesis/interview-facing version of the same argument.
-3. [Depth/fusion formal results](docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md):
+1. [Project narrative](docs/AMR_RELIABILITY_PROJECT_NARRATIVE.md): the full
+   story from simulation data to policy learning and recovery routing.
+2. [Depth/fusion formal results](docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md):
    the scan, depth, and scan+depth policy comparison.
-4. [Residual route ablation results](docs/GAZEBO_POLICY_RESIDUAL_ROUTE_ABLATION_RESULTS.md):
-   the evidence connecting policy residual errors to recovery-route families.
+3. [Residual route ablation results](docs/GAZEBO_POLICY_RESIDUAL_ROUTE_ABLATION_RESULTS.md):
+   how high-confidence policy errors are mapped to recovery-route families.
+4. [Visualization gallery](visualizations/README.md): curated GIFs, figures,
+   and compact evidence tables for presentation.
 
-The curated visual gallery is here:
+Current status: the project has completed a simulation-grounded policy-learning
+and residual-routing prototype. It also includes a first Gazebo/Nav2 recovery
+executor smoke test showing that `REPLAN` route decisions can be translated
+into Nav2 goal reissue actions. The next step is a multi-seed recovery-success
+benchmark.
 
-- [visualizations/README.md](visualizations/README.md)
+## Protocol Guard: What This Project Does And Does Not Claim
 
-## Current Status
+The project separates four layers so that the evidence does not become circular:
 
-The current repository contains a complete simulation-grounded research
-prototype:
+- **Simulation/data layer:** Gazebo/Nav2 episodes generate sensor observations,
+  planner traces, and expert movement labels.
+- **Policy layer:** supervised models learn from scan, depth, or scan+depth
+  observations to predict navigation actions.
+- **Mechanism layer:** residual errors are inspected after policy training,
+  especially high-confidence mistakes.
+- **Recovery layer:** error mechanisms are routed to recovery families such as
+  `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, `HUMAN_REVIEW`, or `SAFE_STOP`.
 
-- a lightweight warehouse AMR reliability demo;
-- a ROS 2 / Gazebo / Nav2 benchmark scaffold;
-- lidar scan and depth-image observation recorders;
-- supervised policy training from Nav2 expert labels;
-- scan-only, depth-only, and scan+depth fusion policy ablations;
-- high-confidence residual error analysis;
-- recovery-route evidence tables and visualizations.
-- a ROS 2 `recovery_executor` node that can translate route decisions into
-  Nav2-facing recovery actions for closed-loop demos.
-
-The formal Gazebo/Nav2 scan-depth matrix completed 36/36 episodes across:
-
-| Item | Setting |
-| --- | --- |
-| Simulator | Gazebo + Nav2 |
-| Episodes | 36 / 36 successful |
-| Seeds | 10, 16, 18 |
-| Split rule | seed 10 train, seed 16 validation, seed 18 test |
-| Goals | `east_south`, `west_near`, `north_near`, `south_axis` |
-| Scenarios | `nominal`, `external_path_blockage`, `perception_degradation` |
-| Labels | Nav2-plan expert actions |
-
-The evidence is useful as a research prototype, but it is not real-world AMR
-validation.
+The current evidence supports a mechanism-aware research prototype. It does
+not yet prove real-robot safety, statistically robust recovery success, or
+deployment readiness.
 
 ## Research Story
 
-The repository follows a mechanism-first sequence:
+The project is organized as a sequence of controlled questions:
 
 ```text
 1. Runtime reliability demo
-   -> show that navigation can fail for different reasons, not only because
-      the planner has no path
+   -> show that AMR failures are not one generic failure type
 
-2. Professional simulation scaffold
-   -> move from a toy grid demo to Gazebo/Nav2 so disturbances, plans, sensor
-      streams, and robot state can be recorded systematically
+2. Gazebo/Nav2 simulation scaffold
+   -> generate repeatable episodes with external disturbance, sensor streams,
+      robot state, and planner traces
 
 3. Expert-labeled policy dataset
-   -> use Nav2 /plan as the expert source and train a policy from observations
-      to movement actions
+   -> use Nav2 plan information as supervised action labels
 
-4. Sensor-policy ablation
-   -> compare scan-only, depth-only, and scan+depth fusion policies under the
-      same held-out simulation split
+4. Policy learning and modality ablation
+   -> compare scan-only, depth-only, and scan+depth policies
 
-5. Sensor-policy playback visualization
-   -> show the actual recorded lidar bins, depth grid, policy decision,
-      confidence, risk score, mechanism, and route over time
+5. Residual mechanism analysis
+   -> inspect confident policy errors and identify structured mechanisms
 
-6. Residual mechanism analysis
-   -> inspect high-confidence policy errors and identify structured failure
-      mechanisms instead of treating every mistake as one generic failure
+6. Recovery-route mapping
+   -> assign different mechanisms to different recovery families
 
-7. Recovery-route prototype
-   -> map different residual mechanisms to different recovery families such as
-      cautious replanning, replanning, relocalization, cautious mode, and human
-      review
-
-8. Closed-loop recovery visualization
-   -> show the route concept visually: original route blocked, lidar-style
-      detection, `REPLAN`, and return to a safe path
+7. Recovery executor smoke test
+   -> connect route decisions to Nav2-facing actions
 ```
 
-The contribution is therefore the **policy-residual-to-recovery-route evidence
+The main contribution is therefore the **policy-failure-to-recovery evidence
 chain**:
 
 ```text
 simulated disturbance
   -> learned policy decision
-  -> residual high-confidence error
-  -> mechanism label
-  -> recovery route
+  -> confident residual error
+  -> diagnosed failure mechanism
+  -> mechanism-specific recovery route
+  -> runtime execution bridge
 ```
 
-## 1. Defining The Problem: AMR Failures Are Not One Failure Type
+The recovery executor is important, but it is currently evidence for route
+execution, not yet proof of successful recovery to the final goal.
 
-An AMR may fail because the path is physically blocked, because perception is
-degraded, because localization is unreliable, because it is near a directional
-decision boundary, or because replanning repeatedly fails. A single fallback is
-therefore too coarse.
+## 1. Problem Definition: AMR Failures Are Not One Failure Type
 
-The first lightweight demo tests this idea in a 2D warehouse grid. The purpose
-is not to claim that the grid is a realistic robot simulator. The purpose is to
-make the runtime reliability interface explicit:
+A warehouse AMR may fail for several different reasons:
 
-| Component | Why introduced | Output |
+| Failure source | Example symptom | Appropriate recovery family |
 | --- | --- | --- |
-| `WarehouseEnvironment` | Provide a controllable warehouse layout. | Robot, target, shelves, static and dynamic obstacles. |
-| `FailureInjector` | Create known failure sources. | Blockage, drift, sensor degradation, target shift, replanning failure. |
-| `ReliabilitySupervisor` | Combine multiple runtime signals. | Risk score from 0 to 1. |
-| `DecisionRouter` | Route different risk patterns. | `NORMAL_NAVIGATION`, `CAUTIOUS_MODE`, `REPLAN`, `RELOCALIZE`, `HUMAN_REVIEW`, `SAFE_STOP`. |
+| External blockage | Planned route is blocked by a moving obstacle. | `REPLAN` |
+| Localization uncertainty | Pose estimate becomes unreliable. | `RELOCALIZE` |
+| Perception degradation | Lidar/depth observations become noisy or incomplete. | `CAUTIOUS_MODE` or `HUMAN_REVIEW` |
+| Execution deviation | Robot drifts away from intended trajectory. | `REPLAN` |
+| Planner instability | Replanning repeatedly fails. | `SAFE_STOP` |
+
+This motivates mechanism-specific routing instead of one generic fallback.
+
+The lightweight warehouse demo makes this interface explicit:
+
+| Component | Role |
+| --- | --- |
+| `WarehouseEnvironment` | Controllable warehouse layout with shelves and obstacles. |
+| `FailureInjector` | Creates blockage, drift, sensor degradation, target shift, and replanning failure. |
+| `ReliabilitySupervisor` | Converts runtime signals into a risk score. |
+| `DecisionRouter` | Routes risk patterns to recovery actions. |
 
 Visual evidence:
 
@@ -162,70 +144,81 @@ Evidence tables:
 - [supervisor_log.csv](visualizations/evidence/runtime_demo/supervisor_log.csv)
 - [comparison_summary.csv](visualizations/evidence/runtime_demo/comparison_summary.csv)
 
-## 2. Moving To Gazebo/Nav2: Why A Professional Simulator Is Needed
+## 2. Simulation And Dataset: Why Gazebo/Nav2 Is Needed
 
-The grid demo is useful for explaining the idea, but it cannot answer the
-research question by itself. To analyze a learned policy, the project needs a
-simulation stack that can provide:
+The grid demo explains the mechanism idea, but it cannot support policy
+learning evidence. The project therefore builds a ROS 2 / Gazebo / Nav2
+benchmark that records:
 
-- repeatable episodes;
-- robot state and plan traces;
-- external disturbance injection;
+- robot pose and goal context;
+- Nav2 plan-derived expert actions;
 - lidar scan observations;
-- depth image observations;
-- expert action labels from a planner.
+- depth-image grid observations;
+- external disturbance signals;
+- runtime route decisions.
 
-This motivates the ROS 2 / Gazebo / Nav2 scaffold under `ros2_ws/`.
+The formal Gazebo/Nav2 scan-depth matrix completed:
 
-Key files:
+| Item | Setting |
+| --- | --- |
+| Simulator | Gazebo + Nav2 |
+| Episodes | 36 / 36 completed |
+| Seeds | 10, 16, 18 |
+| Split rule | seed 10 train, seed 16 validation, seed 18 test |
+| Goals | `east_south`, `west_near`, `north_near`, `south_axis` |
+| Scenarios | `nominal`, `external_path_blockage`, `perception_degradation` |
+| Labels | Nav2-plan expert actions |
+
+Key implementation files:
 
 | File | Role |
 | --- | --- |
+| `ros2_ws/src/amr_reliability_benchmark/worlds/reliability_room.sdf` | Warehouse-style Gazebo world. |
 | `ros2_ws/src/amr_reliability_benchmark/models/reliability_amr/model.sdf` | AMR model with lidar and depth camera. |
-| `ros2_ws/src/amr_reliability_benchmark/worlds/reliability_room.sdf` | Warehouse-style simulation room. |
-| `ros2_ws/src/amr_reliability_benchmark/launch/gazebo_nav2_benchmark.launch.py` | Gazebo/Nav2 launch entry point. |
-| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/gazebo_fault_injector.py` | Disturbance injection. |
-| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/scan_policy_observation_recorder.py` | Scan observation recording. |
-| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/depth_policy_observation_recorder.py` | Depth observation recording. |
+| `ros2_ws/src/amr_reliability_benchmark/launch/gazebo_nav2_benchmark.launch.py` | Gazebo/Nav2 benchmark launch entry. |
+| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/gazebo_fault_injector.py` | External disturbance and signal degradation. |
+| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/scan_policy_observation_recorder.py` | Lidar-policy dataset recorder. |
+| `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/depth_policy_observation_recorder.py` | Depth-policy dataset recorder. |
 
-This step turns the project from a hand-made demo into a simulation-grounded
-policy reliability pipeline.
+Full protocol:
 
-## 3. Policy Learning: How The AMR Learns Actions
+- [Gazebo fault dataset model protocol](docs/GAZEBO_FAULT_DATASET_MODEL_PROTOCOL.md)
+- [Simulation dataset protocol](docs/SIMULATION_DATASET_PROTOCOL.md)
+- [Gazebo validation matrix results](docs/GAZEBO_VALIDATION_MATRIX_RESULTS.md)
 
-The policy is trained by supervised learning, not reinforcement learning.
+## 3. Policy Learning: How The Robot Learns Actions
 
-The expert label comes from Nav2 `/plan`. At each timestep, the recorder aligns
-sensor observations and context with the next movement direction implied by the
-expert plan.
+The policy is trained by supervised learning. It is not currently trained by
+reinforcement learning.
 
-The learned action space is:
+At each timestep, the recorder aligns the observation with the movement
+direction implied by the Nav2 plan. The action labels are:
 
 ```text
 NORTH, SOUTH, EAST, WEST
 ```
 
-`STAY` is not treated as an ordinary Nav2 movement label. It is better
-interpreted as a recovery or safety-supervisor action.
+`STAY` is treated as a safety or recovery outcome rather than an ordinary
+expert navigation action.
 
-The policy variants are:
+The policy variants test different observation sources:
 
 | Policy | Input | Why tested |
 | --- | --- | --- |
-| Scan-only | lidar scan bins + goal/context | Common AMR navigation signal. |
-| Depth-only | depth image grid + goal/context | Adds forward spatial structure and richer perception evidence. |
+| Scan-only | lidar bins + goal/context | Common AMR navigation signal. |
+| Depth-only | depth grid + goal/context | Adds forward spatial structure. |
 | Scan+depth fusion | lidar + depth + goal/context | Tests whether simple multimodal fusion improves reliability. |
 
-Training scripts:
+Training entry points:
 
 - `experiments/train_gazebo_scan_policy.py`
 - `experiments/train_gazebo_depth_policy.py`
 - `experiments/train_gazebo_fusion_policy.py`
 
-## 4. Sensor Ablation: What Improved And What Failed
+## 4. Policy Ablation: What Improved And What Failed
 
-The formal held-out test comparison shows that depth is useful, but simple
-fusion is not yet solved.
+The held-out test comparison suggests that depth adds useful information, but
+simple fusion is not automatically better.
 
 | Modality/model | Accuracy | Macro F1 | Weighted F1 | ECE | High-confidence errors |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -237,31 +230,31 @@ fusion is not yet solved.
 
 Interpretation:
 
-- Depth baseline gives the best held-out accuracy, weighted F1, ECE, and fewer
+- Depth baseline has the best held-out accuracy, weighted F1, ECE, and fewer
   high-confidence errors than scan-only.
-- Scan-only still has the best macro F1 among baseline models, so it remains
-  useful for minority action balance.
-- Simple scan+depth concatenation does not reliably improve the policy.
+- Scan-only retains the best macro F1 among baseline models, so it remains
+  relevant for action balance.
+- Simple scan+depth concatenation does not outperform the best single-modality
+  baseline.
 - Focal loss reduces high-confidence errors, but the accuracy drop is too large
-  to call it the final upgrade.
+  to treat it as the final policy upgrade.
 
 Visual evidence:
 
 ![Policy accuracy by modality](visualizations/policy_routes/test_accuracy_by_modality.png)
 
-Evidence tables:
+Evidence:
 
 - [modality_ablation_metrics.csv](visualizations/evidence/policy_routes/modality_ablation_metrics.csv)
 - [test_ablation_delta_vs_scan_baseline.csv](visualizations/evidence/policy_routes/test_ablation_delta_vs_scan_baseline.csv)
+- [Depth/fusion formal results](docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md)
 
-## 5. Sensor-Policy Playback: What The Policy Sees
+## 5. What The Policy Sees: Sensor-Policy Playback
 
-The repository also includes reconstructed GIFs from one held-out Gazebo/Nav2
-episode. These are not Gazebo screen recordings. They are generated from the
-recorded episode CSV files, so they visualize the same compact sensor features
-used by the policy pipeline.
+The repository includes reconstructed GIFs from a held-out Gazebo/Nav2 episode.
+They are generated from recorded CSV features, not from manual animation.
 
-The selected episode is:
+Selected playback episode:
 
 ```text
 scenario = external_path_blockage
@@ -285,12 +278,12 @@ Generation code:
 
 - `experiments/generate_sensor_policy_visualizations.py`
 
-## 6. Residual Mechanism Analysis: Why The Policy Is Wrong
+## 6. Mechanism Diagnosis: Why The Policy Is Wrong
 
-The key result is not only which policy has the best aggregate score. The
-project asks where confident mistakes come from.
+The key question is not only which model has the best aggregate score. The
+project asks whether confident mistakes are structured.
 
-Dominant high-confidence residuals on the held-out test split include:
+Dominant held-out high-confidence residuals include:
 
 | Scenario | Error pattern | Mechanism interpretation | Proposed route |
 | --- | --- | --- | --- |
@@ -299,23 +292,24 @@ Dominant high-confidence residuals on the held-out test split include:
 | `external_path_blockage` | `WEST -> SOUTH` | blocked-path direction error | `REPLAN` |
 | boundary-like nominal cases | `NORTH <-> WEST` | directional boundary uncertainty | `CAUTIOUS_MODE` |
 
-This mirrors the ECG project logic: the model's residual errors are not random
-noise; they contain mechanism information.
+This is the mechanism layer: policy errors are not treated as random noise or
+one undifferentiated "bad action." They are assigned interpretable failure
+families.
 
 Visual evidence:
 
 ![High-confidence errors by modality](visualizations/policy_routes/test_high_conf_errors_by_modality.png)
 
-Evidence tables:
+Evidence:
 
 - [high_conf_error_patterns.csv](visualizations/evidence/policy_routes/high_conf_error_patterns.csv)
 - [residual_mechanism_summary.csv](visualizations/evidence/policy_routes/residual_mechanism_summary.csv)
 - [scenario_error_summary.csv](visualizations/evidence/policy_routes/scenario_error_summary.csv)
 
-## 7. Recovery Routing: From Error Mechanism To Action
+## 7. Recovery Routing: From Mechanism To Action
 
-After the residual mechanisms are identified, the project maps them to
-recovery-route families.
+After the residual mechanisms are identified, the project maps them to recovery
+families.
 
 | Residual mechanism | Recovery route |
 | --- | --- |
@@ -338,53 +332,23 @@ High-confidence test error coverage:
 | scan baseline | 78 | 1.000 |
 | scan focal | 51 | 1.000 |
 
-This does not prove closed-loop recovery success yet. It shows that residual
-policy errors can be assigned to meaningful recovery families instead of being
-collapsed into a single fallback.
+This shows that high-confidence residual errors can be assigned to meaningful
+route families. It does not, by itself, prove that each route will succeed in
+closed-loop control.
 
 Visual evidence:
 
 ![Recovery route distribution](visualizations/policy_routes/test_recovery_route_distribution.png)
 
-Evidence tables:
+Evidence:
 
 - [recovery_route_evidence.csv](visualizations/evidence/policy_routes/recovery_route_evidence.csv)
 - [recovery_route_coverage.csv](visualizations/evidence/policy_routes/recovery_route_coverage.csv)
 - [residual_route_report.json](visualizations/evidence/policy_routes/residual_route_report.json)
 
-## 8. Closed-Loop Recovery Visualization: Wrong Route To Correct Route
+## 8. Runtime Execution: From Route Label To Nav2 Action
 
-The repository includes a recovery-route playback that shows the behavior you
-would expect from the router layer:
-
-```text
-original route
-  -> external blockage appears
-  -> lidar-style ray detects the blockage
-  -> policy route is unsafe
-  -> router triggers REPLAN
-  -> AMR follows a new route back toward the goal
-```
-
-![Closed-loop replan recovery demo](visualizations/recovery_route/closed_loop_replan_recovery_demo.gif)
-
-This is a conceptual closed-loop visualization generated from the lightweight
-warehouse environment. It demonstrates the recovery route mechanism visually,
-but it is not yet a full Gazebo/Nav2 closed-loop recovery execution video.
-
-Source manifest:
-
-- [recovery_route_visualization_manifest.csv](visualizations/recovery_route/recovery_route_visualization_manifest.csv)
-
-Generation code:
-
-- `experiments/generate_recovery_route_demo.py`
-
-## 9. Gazebo/Nav2 Recovery Executor: Turning Routes Into Actions
-
-The project now includes the first execution layer for a true Gazebo/Nav2
-closed-loop recovery demo, plus a headless Gazebo/Nav2 smoke run showing that
-the route events reach Nav2-facing recovery actions:
+The project now includes a conservative ROS 2 recovery executor:
 
 ```text
 /amr_reliability/router_decision
@@ -394,18 +358,18 @@ the route events reach Nav2-facing recovery actions:
   -> /amr_reliability/recovery_execution event log
 ```
 
-The executor is conservative. It does not publish raw velocity commands and
-does not bypass Nav2. Instead:
+The executor does not publish raw velocity commands and does not bypass Nav2.
+It only sends messages that the navigation stack already understands.
 
 | Route | Executor behavior | Current status |
 | --- | --- | --- |
-| `REPLAN` | Reissues the current `/goal_pose` so Nav2 can replan against the updated costmap. | Implemented. |
-| `RELOCALIZE` | Publishes a pose estimate to `/initialpose`. | Implemented. |
-| `CAUTIOUS_MODE` | Records the route event for a downstream speed controller. | Logged only. |
+| `REPLAN` | Reissues the current `/goal_pose` so Nav2 can replan. | Implemented and smoke-tested. |
+| `RELOCALIZE` | Publishes a pose estimate to `/initialpose`. | Implemented, needs expanded episodes. |
+| `CAUTIOUS_MODE` | Records the route for a downstream cautious controller. | Logged only. |
 | `HUMAN_REVIEW` | Records the operator-review route. | Logged only. |
 | `SAFE_STOP` | Records the stop route for a downstream controller. | Logged only. |
 
-Smoke-run evidence:
+Gazebo/Nav2 smoke-run evidence:
 
 | Evidence item | Value |
 | --- | ---: |
@@ -420,10 +384,12 @@ Smoke-run evidence:
 
 ![Gazebo Nav2 recovery executor playback](visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_execution.gif)
 
-This evidence supports the narrower claim that mechanism-aware routes can be
-translated into Nav2 actions. It does not yet prove closed-loop recovery
-success to the final goal; the smoke run still contains planner failures and
-therefore becomes the next research target.
+Supported claim: mechanism-aware route decisions can be translated into
+Nav2-facing recovery actions.
+
+Not yet proven: stable recovery to the final goal after route triggering. The
+smoke run still contains planner failures, so the next research step is a
+multi-seed recovery-success benchmark.
 
 Entry points:
 
@@ -437,20 +403,18 @@ Launch flag:
 enable_recovery_executor:=true
 ```
 
-The current bridge uses cooldowns and valid-goal checks so repeated router
-events do not continuously preempt Nav2 before a usable goal exists.
-
 ## Claim-To-Evidence Index
 
 | Claim | Evidence | Source |
 | --- | --- | --- |
 | AMR failures should not be treated as one generic failure. | Runtime supervisor and router separate blockage, localization, perception, replanning, and stagnation signals. | `src/reliability_supervisor.py`, `src/decision_router.py`, runtime visualizations |
 | Gazebo/Nav2 can generate policy-learning episodes. | 36/36 formal episodes completed with synchronized scan/depth/policy logs. | `docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md` |
+| Nav2 can provide expert action labels. | Episode recorders align sensor observations with Nav2 plan-derived movement labels. | `scan_policy_observation_recorder.py`, `depth_policy_observation_recorder.py` |
 | Depth adds useful reliability evidence. | Depth baseline has the best held-out accuracy, weighted F1, ECE, and fewer high-confidence errors than scan-only. | `visualizations/evidence/policy_routes/modality_ablation_metrics.csv` |
 | Simple scan+depth fusion is not enough. | Fusion baseline does not outperform the best single-modality baseline. | `docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md` |
 | Policy errors are structured. | High-confidence residuals concentrate in perception axis confusion and blocked-path direction errors. | `visualizations/evidence/policy_routes/high_conf_error_patterns.csv` |
 | Recovery routes can be mechanism-specific. | Residual mechanisms map to `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, and `HUMAN_REVIEW`. | `visualizations/evidence/policy_routes/recovery_route_evidence.csv` |
-| Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the Gazebo/Nav2 smoke run recorded 6 published `REPLAN` goal reissues. | `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py`, `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
+| Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the smoke run recorded 6 published `REPLAN` goal reissues. | `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
 
 ## Repository Map
 
@@ -459,7 +423,8 @@ src/
   Lightweight warehouse reliability demo, supervisor, router, and visualization helpers
 
 experiments/
-  Dataset generation, Gazebo/Nav2 policy training, ablations, and residual-route analysis
+  Dataset generation, Gazebo/Nav2 policy training, ablations, residual-route
+  analysis, and visualization scripts
 
 ros2_ws/
   ROS 2 / Gazebo / Nav2 package, robot model, world, launch files, recorders,
@@ -495,33 +460,27 @@ Run tests:
 python -m pytest tests
 ```
 
-The demo writes local artifacts under `outputs/`. Curated visual artifacts for
-GitHub are copied into `visualizations/`.
-
 ## Reproduce The Gazebo/Nav2 Pipeline
 
-The Gazebo/Nav2 experiments require ROS 2 Jazzy, Gazebo, and Nav2. The
-installation notes and stack check scripts are provided here:
+The Gazebo/Nav2 experiments require ROS 2 Jazzy, Gazebo, and Nav2.
+
+Installation notes:
 
 - `docs/INSTALL_ROS2_NAV2_GAZEBO_JAZZY.md`
 - `ros2_ws/src/amr_reliability_benchmark/scripts/check_ros_stack.sh`
 - `ros2_ws/src/amr_reliability_benchmark/scripts/install_jazzy_nav2_gazebo.sh`
 
-Typical pipeline stages:
+Typical analysis commands:
 
 ```powershell
-# Train scan, depth, and fusion policies from generated episode tables.
 python experiments/train_gazebo_scan_policy.py
 python experiments/train_gazebo_depth_policy.py
 python experiments/train_gazebo_fusion_policy.py
-
-# Analyze residual mechanisms and route evidence.
 python experiments/analyze_policy_residual_routes.py
 ```
 
-The exact formal outputs used in the current report are preserved locally under
-`outputs/`, while the compact evidence tables used for public review are under
-`visualizations/evidence/`.
+Raw formal outputs are intentionally kept under `outputs/` and ignored by Git.
+Curated figures and compact public evidence tables are under `visualizations/`.
 
 ## What Is Shown
 
@@ -534,15 +493,15 @@ The repository shows that:
 - depth improves several held-out reliability metrics in the current matrix;
 - policy residual errors are structured by disturbance type;
 - different residual mechanisms can be routed to different recovery families;
-- the `REPLAN` recovery route can be executed as Nav2 goal reissues in a
-  headless Gazebo/Nav2 smoke run.
+- `REPLAN` route decisions can be executed as Nav2 goal reissues in a headless
+  Gazebo/Nav2 smoke run.
 
 ## What Remains Unproven
 
 The repository does not yet prove:
 
 - real-world AMR safety;
-- stable closed-loop goal-reaching success after a route is triggered;
+- stable closed-loop goal-reaching success after a recovery route is triggered;
 - statistical robustness beyond the current limited seed matrix;
 - a final best multimodal fusion architecture;
 - full relocalization performance under expanded localization-drift episodes.
@@ -554,12 +513,12 @@ benchmark:
 
 1. Run multiple `external_path_blockage`, `progress_blockage`, and
    `boundary_weak_blockage` Gazebo/Nav2 seeds with `enable_recovery_executor`.
-2. Tune recovery timing, cooldowns, and goal handoff so REPLAN does not
+2. Tune recovery timing, cooldowns, and goal handoff so `REPLAN` does not
    destabilize Nav2 through repeated preemption.
 3. Measure goal success, time-to-recover, planner failures, and over-routing.
 4. Add localization-drift episodes to validate the `RELOCALIZE` branch.
 5. Compare rule-based, learned, uncertainty-threshold, and mechanism-aware
-   gated-fusion route selectors.
+   route selectors.
 
 ## Limitations
 
@@ -567,6 +526,6 @@ benchmark:
 - The formal scan/depth/fusion comparison currently has one held-out test seed.
 - The route layer is an evidence-backed prototype, not a proven closed-loop
   safety controller.
-- Raw `outputs/` artifacts can be large and are intentionally excluded from
-  Git; curated figures and compact tables are provided under `visualizations/`.
+- The current recovery executor smoke test proves route-to-Nav2 action
+  connection, not final navigation success.
 - Hardware-facing robot control is outside the scope of this repository.
