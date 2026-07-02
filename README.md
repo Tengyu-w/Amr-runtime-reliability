@@ -44,8 +44,8 @@ with these files:
 Current status: the project has completed a simulation-grounded policy-learning
 and residual-routing prototype. It also includes a first Gazebo/Nav2 recovery
 executor smoke test showing that `REPLAN` route decisions can be translated
-into Nav2 goal reissue actions. The next step is a multi-seed recovery-success
-benchmark.
+into Nav2 goal reissue actions, plus a near-goal Gazebo/Nav2 recovery-success
+smoke run. The next step is a multi-seed recovery-success benchmark.
 
 ## Protocol Guard: What This Project Does And Does Not Claim
 
@@ -88,8 +88,9 @@ The project is organized as a sequence of controlled questions:
 6. Recovery-route mapping
    -> assign different mechanisms to different recovery families
 
-7. Recovery executor smoke test
-   -> connect route decisions to Nav2-facing actions
+7. Recovery executor and Gazebo/Nav2 success smoke test
+   -> connect route decisions to Nav2-facing actions and verify one
+      route-triggered recovery episode with Nav2 goal success
 ```
 
 The main contribution is therefore the **policy-failure-to-recovery evidence
@@ -104,8 +105,9 @@ simulated disturbance
   -> runtime execution bridge
 ```
 
-The recovery executor is important, but it is currently evidence for route
-execution, not yet proof of successful recovery to the final goal.
+The recovery executor is important, but the current evidence should still be
+read as a smoke-tested prototype rather than a statistically validated recovery
+controller.
 
 ## 1. Problem Definition: AMR Failures Are Not One Failure Type
 
@@ -369,7 +371,7 @@ It only sends messages that the navigation stack already understands.
 | `HUMAN_REVIEW` | Records the operator-review route. | Logged only. |
 | `SAFE_STOP` | Records the stop route for a downstream controller. | Logged only. |
 
-Gazebo/Nav2 smoke-run evidence:
+Gazebo/Nav2 route-to-executor bridge smoke evidence:
 
 | Evidence item | Value |
 | --- | ---: |
@@ -387,9 +389,25 @@ Gazebo/Nav2 smoke-run evidence:
 Supported claim: mechanism-aware route decisions can be translated into
 Nav2-facing recovery actions.
 
-Not yet proven: stable recovery to the final goal after route triggering. The
-smoke run still contains planner failures, so the next research step is a
-multi-seed recovery-success benchmark.
+Gazebo/Nav2 recovery-success smoke evidence:
+
+| Evidence item | Value |
+| --- | ---: |
+| Routed episode rows | 334 |
+| Recovery-executor rows | 331 |
+| Published `REPLAN` goal reissues | 5 |
+| Nav2 goal succeeded messages | 4 |
+| Nav2 goal preemption messages | 2 |
+| New paths passed to controller | 16 |
+| Failed-to-make-progress messages | 0 |
+| Planner failures observed | 0 |
+
+![Gazebo Nav2 recovery success episode](visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_episode.gif)
+
+Supported claim: in one near-goal external-blockage Gazebo/Nav2 smoke run,
+route-triggered `REPLAN` was executed and Nav2 reported goal success. This is
+the first true ROS2/Gazebo closed-loop recovery video in the repository. It is
+not yet a multi-seed recovery benchmark.
 
 Entry points:
 
@@ -410,13 +428,14 @@ process:
 | --- | --- | --- |
 | 1 | `closed_loop_replan_recovery_demo.gif` | Conceptual route logic: blocked original route, route decision, replanned path. |
 | 2 | `gazebo_nav2_closed_loop_recovery_execution.gif` | Route decision connected to Nav2-facing executor actions; not yet goal success. |
-| 3 | `closed_loop_recovery_supervisor_story.gif` | Readable closed-loop story for supervisors: blockage, diagnosis, `REPLAN`, recovered path, goal reached. |
+| 3 | `closed_loop_recovery_supervisor_story.gif` | Readable lightweight story for supervisors: blockage, diagnosis, `REPLAN`, recovered path, goal reached. |
+| 4 | `gazebo_nav2_recovery_success_episode.gif` | True Gazebo/Nav2 smoke video: lidar, depth, route decision, executor events, and Nav2 goal success. |
 
 ![Closed-loop recovery supervisor story](visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif)
 
-The third video is the most useful short presentation clip. It is a lightweight
-closed-loop demonstration, not a real-robot or full Gazebo recovery-success
-benchmark.
+The third video is the clearest mechanism explanation. The fourth video is the
+stronger ROS2/Gazebo evidence because it is reconstructed from real Gazebo/Nav2
+logs rather than the lightweight simulator.
 
 ## Claim-To-Evidence Index
 
@@ -431,6 +450,7 @@ benchmark.
 | Recovery routes can be mechanism-specific. | Residual mechanisms map to `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, and `HUMAN_REVIEW`. | `visualizations/evidence/policy_routes/recovery_route_evidence.csv` |
 | Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the smoke run recorded 6 published `REPLAN` goal reissues. | `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
 | A recovery story can be visualized end to end for presentation. | The supervisor-facing closed-loop video shows blockage, diagnosis, `REPLAN`, replanned route, and goal reached in the lightweight simulator. | `visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif`, `visualizations/recovery_route/supervisor_recovery_story_manifest.csv` |
+| One ROS2/Gazebo closed-loop recovery smoke run reaches goal success. | The near-goal external-blockage episode recorded 5 published `REPLAN` goal reissues, 16 new paths to controller, 4 Nav2 goal-succeeded messages, and 0 planner failures. | `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_episode.gif`, `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_summary.csv` |
 
 ## Repository Map
 
@@ -511,6 +531,8 @@ The repository shows that:
 - different residual mechanisms can be routed to different recovery families;
 - `REPLAN` route decisions can be executed as Nav2 goal reissues in a headless
   Gazebo/Nav2 smoke run;
+- one near-goal external-blockage Gazebo/Nav2 recovery smoke run reports Nav2
+  goal success with lidar and depth logs;
 - the recovery process can be shown as a readable closed-loop presentation
   video in the lightweight simulator.
 
@@ -519,15 +541,16 @@ The repository shows that:
 The repository does not yet prove:
 
 - real-world AMR safety;
-- stable closed-loop goal-reaching success after a recovery route is triggered;
+- multi-seed stable closed-loop goal-reaching success after a recovery route is
+  triggered;
 - statistical robustness beyond the current limited seed matrix;
 - a final best multimodal fusion architecture;
 - full relocalization performance under expanded localization-drift episodes.
 
 ## Recommended Next Experiment
 
-The next experiment should turn the executor smoke test into a recovery-success
-benchmark:
+The next experiment should turn the single Gazebo/Nav2 recovery-success smoke
+run into a benchmark:
 
 1. Run multiple `external_path_blockage`, `progress_blockage`, and
    `boundary_weak_blockage` Gazebo/Nav2 seeds with `enable_recovery_executor`.
@@ -544,8 +567,8 @@ benchmark:
 - The formal scan/depth/fusion comparison currently has one held-out test seed.
 - The route layer is an evidence-backed prototype, not a proven closed-loop
   safety controller.
-- The current recovery executor smoke test proves route-to-Nav2 action
-  connection, not final navigation success.
+- The current Gazebo/Nav2 recovery-success evidence is one near-goal smoke run,
+  not a statistically robust benchmark.
 - The supervisor-facing recovery video is a clear lightweight closed-loop
   demonstration, not a full Gazebo/Nav2 success benchmark.
 - Hardware-facing robot control is outside the scope of this repository.
