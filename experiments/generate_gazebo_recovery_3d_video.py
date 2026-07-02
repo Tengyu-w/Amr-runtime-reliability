@@ -115,7 +115,7 @@ def _render_frame(
     _draw_info(ax_info, row, events, stdout)
 
     fig.suptitle(
-        "3D Gazebo/Nav2 recovery smoke: AMR, lidar/depth, REPLAN, goal success",
+        "3D Gazebo/Nav2 closed-loop recovery: visible blockage signal -> REPLAN -> goal success",
         fontsize=14,
         y=0.985,
     )
@@ -138,7 +138,7 @@ def _draw_3d_scene(
     _draw_floor(ax)
     _draw_shelf(ax, (-2.5, 0.0, 0.5), (0.4, 5.5, 1.0))
     _draw_shelf(ax, (2.5, 0.0, 0.5), (0.4, 5.5, 1.0))
-    _draw_dynamic_obstacle(ax)
+    _draw_blocked_corridor(ax, row, history)
 
     ax.plot(history["robot_x"], history["robot_y"], np.full(len(history), 0.08), color="#0b4fa3", linewidth=3)
     goal = _goal_odom_proxy(row)
@@ -170,6 +170,19 @@ def _draw_3d_scene(
     ax.set_xlabel("Gazebo odom x (m)")
     ax.set_ylabel("Gazebo odom y (m)")
     ax.set_zlabel("height (m)")
+    ax.text2D(
+        0.02,
+        0.97,
+        (
+            "REPLAN trigger: external blockage signal "
+            f"path_blocked_score={float(row['path_blocked_score']):.2f}"
+        ),
+        transform=ax.transAxes,
+        fontsize=10,
+        weight="bold",
+        color="#8f1d1d",
+        bbox={"facecolor": "#fff4f4", "alpha": 0.92, "edgecolor": "#c43131"},
+    )
     ax.set_title("3D warehouse scene reconstructed from Gazebo logs")
 
 
@@ -184,15 +197,64 @@ def _draw_shelf(ax: plt.Axes, center: tuple[float, float, float], size: tuple[fl
     _add_box(ax, center, size, facecolor="#55585f", alpha=0.72)
 
 
-def _draw_dynamic_obstacle(ax: plt.Axes) -> None:
+def _draw_blocked_corridor(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) -> None:
+    start = np.array([float(history["robot_x"].iloc[0]), float(history["robot_y"].iloc[0])])
+    goal = np.array(_goal_odom_proxy(row))
+    direction = goal - start
+    norm = float(np.linalg.norm(direction))
+    if norm < 1e-6:
+        center = start + np.array([0.65, 0.0])
+        yaw = 0.0
+    else:
+        unit = direction / norm
+        center = start + unit * min(1.55, norm * 0.48)
+        yaw = math.atan2(unit[1], unit[0])
+    ax.plot(
+        [start[0], goal[0]],
+        [start[1], goal[1]],
+        [0.05, 0.05],
+        color="#6f6f6f",
+        linestyle="--",
+        linewidth=1.5,
+        alpha=0.7,
+    )
+    _draw_dynamic_obstacle(ax, (float(center[0]), float(center[1])))
+    _add_oriented_box(
+        ax,
+        center=(float(center[0]), float(center[1]), 0.45),
+        size=(0.16, 1.95, 0.9),
+        yaw=yaw,
+        facecolor="#d62728",
+        alpha=0.58,
+    )
+    _add_oriented_box(
+        ax,
+        center=(float(center[0]), float(center[1]), 0.035),
+        size=(1.15, 2.15, 0.05),
+        yaw=yaw,
+        facecolor="#d62728",
+        alpha=0.18,
+    )
+    ax.text(
+        float(center[0]) + 0.12,
+        float(center[1]) + 0.12,
+        1.15,
+        "injected blocked corridor\nREPLAN source signal",
+        color="#8f1d1d",
+        fontsize=9,
+        weight="bold",
+    )
+
+
+def _draw_dynamic_obstacle(ax: plt.Axes, center: tuple[float, float]) -> None:
     theta = np.linspace(0, 2 * np.pi, 28)
     z = np.linspace(0.0, 0.7, 2)
     theta_grid, z_grid = np.meshgrid(theta, z)
     radius = 0.25
-    x = radius * np.cos(theta_grid)
-    y = radius * np.sin(theta_grid)
+    x = center[0] + radius * np.cos(theta_grid)
+    y = center[1] + radius * np.sin(theta_grid)
     ax.plot_surface(x, y, z_grid, color="#d62728", alpha=0.55, linewidth=0)
-    ax.text(0.28, 0.0, 0.78, "dynamic\nobstacle", color="#8f1d1d", fontsize=8)
+    ax.text(center[0] + 0.28, center[1], 0.78, "dynamic\nobstacle", color="#8f1d1d", fontsize=8)
 
 
 def _draw_amr(ax: plt.Axes, position: tuple[float, float], yaw: float) -> None:
@@ -287,6 +349,8 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "",
         f"router decision: {row['router_decision']}",
         f"failure mechanism: {row['failure_mechanism']}",
+        f"path blocked score: {float(row['path_blocked_score']):.2f}",
+        f"obstacle proximity: {float(row['obstacle_proximity']):.2f}",
         f"latest executor: {latest.get('executor_action', 'none yet')}",
         f"latest result: {latest.get('result', '')}",
         "",
@@ -304,6 +368,8 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "lidar rays and depth grid from sensors,",
         "orange markers where REPLAN was sent,",
         "and Nav2 goal success in stdout.",
+        "The red blockage is the overlay for",
+        "the injected external path-blockage signal.",
     ]
     ax.text(0.0, 0.99, "\n".join(lines), va="top", ha="left", fontsize=9.6)
 
@@ -416,7 +482,7 @@ def _write_summary(
             "nav2_goal_preemptions": stdout.count("Received goal preemption request"),
             "nav2_new_paths_to_controller": stdout.count("Passing new path to controller"),
             "nav2_planner_failures": stdout.count("GridBased plugin failed to plan"),
-            "evidence_level": "3D reconstruction from real Gazebo/Nav2 recovery-success smoke logs",
+            "evidence_level": "3D reconstruction from real Gazebo/Nav2 recovery-success validation logs",
         }
     ]
     pd.DataFrame(rows).to_csv(output_dir / "gazebo_nav2_recovery_success_3d_summary.csv", index=False)
@@ -431,7 +497,7 @@ def _write_summary(
                     "AMR odometry, lidar rays, depth grid, route decisions, recovery executor, "
                     "and Nav2 goal success."
                 ),
-                "evidence_level": "3D Gazebo/Nav2 recovery-success smoke visualization",
+                "evidence_level": "3D Gazebo/Nav2 recovery-success validation visualization",
             }
         ]
     ).to_csv(output_dir / "gazebo_nav2_recovery_success_3d_manifest.csv", index=False)

@@ -13,7 +13,7 @@ Runtime demo
 -> baseline comparison
 -> closed-loop recovery-route demonstration
 -> supervisor-facing closed-loop recovery story
--> true Gazebo/Nav2 recovery-success smoke video
+-> true Gazebo/Nav2 recovery-success validation video
 -> 3D Gazebo/Nav2 recovery presentation view
 -> scan/depth/fusion policy ablation
 -> high-confidence residual errors
@@ -121,12 +121,12 @@ Generation code:
 
 - `experiments/generate_supervisor_recovery_story_video.py`
 
-## 7. True Gazebo/Nav2 Recovery-Success Smoke Video
+## 7. True Gazebo/Nav2 Recovery-Success Validation Video
 
 This GIF is reconstructed from a real headless Gazebo/Nav2 run, not from the
 lightweight grid simulator. It shows Gazebo odometry, LiDAR scan bins, depth
 grid observations, route decisions, recovery-executor events, and Nav2 stdout
-evidence. In this longer external-blockage smoke run, the AMR moves through
+evidence. In this longer external-blockage validation run, the AMR moves through
 the warehouse scene and Nav2 reports goal success after route-triggered
 `REPLAN`.
 
@@ -143,7 +143,7 @@ Generation code:
 
 ## 8. 3D Gazebo/Nav2 Recovery Presentation View
 
-This GIF is the most visual version of the recovery-success smoke run. It
+This GIF is the most visual version of the recovery-success validation run. It
 reconstructs a 3D scene from the same ROS 2/Gazebo/Nav2 logs: AMR body,
 warehouse shelves, dynamic obstacle, lidar rays, depth camera grid, `REPLAN`
 markers, and Nav2 goal-success evidence.
@@ -233,4 +233,4 @@ These figures are simulation-grounded evidence, not real-robot validation. The
 formal Gazebo/Nav2 matrix currently uses one held-out test seed in the main
 scan/depth/fusion comparison, so the results should be presented as a research
 prototype rather than final statistical proof. The Gazebo/Nav2 recovery-success
-and 3D videos are one smoke run, not a multi-seed recovery benchmark.
+and 3D videos are one validation run, not a multi-seed recovery benchmark.

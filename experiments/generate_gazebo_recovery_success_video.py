@@ -9,6 +9,7 @@ Gazebo/Nav2 run.
 from __future__ import annotations
 
 import argparse
+import math
 from collections import Counter
 from pathlib import Path
 
@@ -137,8 +138,7 @@ def _draw_map(ax: plt.Axes, row: pd.Series, history: pd.DataFrame, events: pd.Da
     ax.grid(True, color="white", linewidth=1.0)
     ax.set_aspect("equal", adjustable="box")
 
-    ax.add_patch(plt.Rectangle((-0.35, -0.35), 0.7, 0.7, color="#cf2e2e", alpha=0.22))
-    ax.text(0.08, 0.16, "dynamic obstacle\nnear route", fontsize=8, color="#8f1d1d")
+    _draw_blockage_overlay(ax, row, history)
 
     ax.plot(history["robot_x"], history["robot_y"], color="#0b4fa3", linewidth=2.8, label="Gazebo odom trace")
     ax.scatter(row["robot_x"], row["robot_y"], s=190, color="#0b4fa3", edgecolor="white", zorder=6, label="AMR")
@@ -172,6 +172,68 @@ def _draw_map(ax: plt.Axes, row: pd.Series, history: pd.DataFrame, events: pd.Da
 
 def _goal_odom_proxy(row: pd.Series) -> tuple[float, float]:
     return (float(row["target_x"]) - INITIAL_MAP_POSE[0], float(row["target_y"]) - INITIAL_MAP_POSE[1])
+
+
+def _draw_blockage_overlay(ax: plt.Axes, row: pd.Series, history: pd.DataFrame) -> None:
+    center, yaw = _blockage_pose(row, history)
+    goal = _goal_odom_proxy(row)
+    start = (float(history["robot_x"].iloc[0]), float(history["robot_y"].iloc[0]))
+    ax.plot(
+        [start[0], goal[0]],
+        [start[1], goal[1]],
+        color="#6f6f6f",
+        linestyle="--",
+        linewidth=1.3,
+        alpha=0.65,
+        label="blocked direct route",
+    )
+    no_go = _oriented_rectangle(center, (1.15, 2.05), yaw)
+    wall = _oriented_rectangle(center, (0.16, 1.85), yaw)
+    ax.add_patch(plt.Polygon(no_go, closed=True, facecolor="#cf2e2e", edgecolor="none", alpha=0.16, zorder=2))
+    ax.add_patch(
+        plt.Polygon(wall, closed=True, facecolor="#cf2e2e", edgecolor="#8f1d1d", alpha=0.62, zorder=3)
+    )
+    ax.scatter([center[0]], [center[1]], s=130, color="#cf2e2e", edgecolor="white", zorder=4)
+    ax.text(
+        center[0] + 0.08,
+        center[1] + 0.08,
+        "external blockage\npath_blocked_score high",
+        fontsize=8,
+        color="#8f1d1d",
+        weight="bold",
+        zorder=5,
+    )
+
+
+def _blockage_pose(row: pd.Series, history: pd.DataFrame) -> tuple[tuple[float, float], float]:
+    start = np.array([float(history["robot_x"].iloc[0]), float(history["robot_y"].iloc[0])])
+    goal = np.array(_goal_odom_proxy(row))
+    direction = goal - start
+    norm = float(np.linalg.norm(direction))
+    if norm < 1e-6:
+        return (float(start[0] + 0.65), float(start[1])), 0.0
+    unit = direction / norm
+    center = start + unit * min(1.55, norm * 0.48)
+    return (float(center[0]), float(center[1])), math.atan2(float(unit[1]), float(unit[0]))
+
+
+def _oriented_rectangle(
+    center: tuple[float, float],
+    size: tuple[float, float],
+    yaw: float,
+) -> np.ndarray:
+    cx, cy = center
+    sx, sy = size
+    local = np.array(
+        [
+            [-sx / 2, -sy / 2],
+            [sx / 2, -sy / 2],
+            [sx / 2, sy / 2],
+            [-sx / 2, sy / 2],
+        ]
+    )
+    rot = np.array([[math.cos(yaw), -math.sin(yaw)], [math.sin(yaw), math.cos(yaw)]])
+    return local @ rot.T + np.array([cx, cy])
 
 
 def _draw_timeline(
@@ -272,6 +334,8 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "",
         f"router decision: {row['router_decision']}",
         f"failure mechanism: {row['failure_mechanism']}",
+        f"path blocked score: {float(row['path_blocked_score']):.2f}",
+        f"obstacle proximity: {float(row['obstacle_proximity']):.2f}",
         f"latest executor: {latest.get('executor_action', 'none yet')}",
         f"latest result: {latest.get('result', '')}",
         "",
@@ -290,6 +354,8 @@ def _draw_info(ax: plt.Axes, row: pd.Series, events: pd.DataFrame, stdout: str) 
         "This video uses real ROS 2/Gazebo logs:",
         "odom, lidar, depth, router decisions,",
         "recovery executor events, and Nav2 stdout.",
+        "The red blockage is the visual overlay for",
+        "the injected external path-blockage signal.",
     ]
     ax.text(0.0, 0.99, "\n".join(lines), va="top", ha="left", fontsize=9.5)
 
@@ -337,7 +403,7 @@ def _write_manifest(output_dir: Path, input_dir: Path, frames: int) -> None:
                     "real ROS 2 logs: odom, lidar, depth, router decision, recovery executor, "
                     "and Nav2 goal success."
                 ),
-                "evidence_level": "Gazebo/Nav2 closed-loop recovery success smoke test",
+                "evidence_level": "Gazebo/Nav2 closed-loop recovery success validation run",
             }
         ]
     ).to_csv(output_dir / "gazebo_nav2_recovery_success_manifest.csv", index=False)
