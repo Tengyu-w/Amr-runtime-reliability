@@ -1,2 +1,0 @@
-artifact,source_dir,routed_rows,recovery_rows,published_replan_events,cooldown_skips,wait_for_valid_goal_skips,published_results,skipped_results,nav2_goal_preemptions,nav2_new_paths_to_controller,nav2_planner_failures,claim_supported,claim_not_supported_yet
-gazebo_nav2_closed_loop_recovery_execution.gif,outputs\gazebo_closed_loop_executor_smoke_v2,313,303,6,221,76,6,297,5,15,29,route decisions are translated into Nav2-facing recovery actions,successful goal-reaching after recovery

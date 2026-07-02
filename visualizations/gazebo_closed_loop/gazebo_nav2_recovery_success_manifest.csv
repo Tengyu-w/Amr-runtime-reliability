@@ -1,2 +1,2 @@
 artifact,frames,source_dir,description,evidence_level
-gazebo_nav2_recovery_success_episode.gif,65,outputs\gazebo_recovery_near_goal_check,"Readable Gazebo/Nav2 closed-loop recovery episode reconstructed from real ROS 2 logs: odom, lidar, depth, router decision, recovery executor, and Nav2 goal success.",Gazebo/Nav2 closed-loop recovery success smoke test
+gazebo_nav2_recovery_success_episode.gif,83,outputs\gazebo_recovery_long_goal_check,"Readable Gazebo/Nav2 closed-loop recovery episode reconstructed from real ROS 2 logs: odom, lidar, depth, router decision, recovery executor, and Nav2 goal success.",Gazebo/Nav2 closed-loop recovery success smoke test

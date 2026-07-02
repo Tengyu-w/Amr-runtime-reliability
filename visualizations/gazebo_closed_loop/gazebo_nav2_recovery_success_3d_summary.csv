@@ -1,2 +1,2 @@
 artifact,source_dir,visual_start_time_step,frames,routed_rows,recovery_rows,published_replan_events,nav2_goal_succeeded,nav2_goal_preemptions,nav2_new_paths_to_controller,nav2_planner_failures,evidence_level
-gazebo_nav2_recovery_success_3d.gif,outputs\gazebo_recovery_near_goal_check,75,52,334,331,5,4,2,16,0,3D reconstruction from real Gazebo/Nav2 recovery-success smoke logs
+gazebo_nav2_recovery_success_3d.gif,outputs\gazebo_recovery_long_goal_check,74,83,479,479,7,5,3,44,1,3D reconstruction from real Gazebo/Nav2 recovery-success smoke logs

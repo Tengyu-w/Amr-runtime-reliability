@@ -286,7 +286,7 @@ def _draw_info(ax: plt.Axes, row: dict[str, object]) -> None:
         "",
         "Evidence level:",
         "readable lightweight closed-loop demo;",
-        "Gazebo/Nav2 executor smoke evidence is separate.",
+        "Gazebo/Nav2 recovery evidence is separate.",
     ]
     ax.text(0.0, 0.98, "\n".join(lines), va="top", ha="left", fontsize=10.5)
 
