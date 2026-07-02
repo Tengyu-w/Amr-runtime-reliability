@@ -1,0 +1,16 @@
+modality,model_name,split,total_high_conf_errors,actionable_high_conf_errors,actionable_fraction
+depth,baseline_depth_goal,test,62,62,1.0
+depth,baseline_depth_goal,train,2,1,0.5
+depth,baseline_depth_goal,val,55,41,0.7454545454545455
+fusion,baseline_scan_depth_goal,test,64,63,0.984375
+fusion,baseline_scan_depth_goal,train,3,3,1.0
+fusion,baseline_scan_depth_goal,val,89,68,0.7640449438202247
+fusion,class_weighted_focal_scan_depth_goal,test,52,52,1.0
+fusion,class_weighted_focal_scan_depth_goal,train,2,2,1.0
+fusion,class_weighted_focal_scan_depth_goal,val,24,23,0.9583333333333334
+scan,baseline_scan_goal,test,78,78,1.0
+scan,baseline_scan_goal,train,3,3,1.0
+scan,baseline_scan_goal,val,63,48,0.7619047619047619
+scan,class_weighted_focal_scan_goal,test,51,51,1.0
+scan,class_weighted_focal_scan_goal,train,1,1,1.0
+scan,class_weighted_focal_scan_goal,val,25,17,0.68

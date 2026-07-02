@@ -1,0 +1,42 @@
+modality,model_name,split,recovery_route,n_high_conf_errors,mechanisms,scenarios,confusion_pairs,route_role
+scan,baseline_scan_goal,test,CAUTIOUS_REPLAN,49,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,perception-risk recovery
+scan,class_weighted_focal_scan_goal,test,CAUTIOUS_REPLAN,38,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,perception-risk recovery
+fusion,class_weighted_focal_scan_depth_goal,test,CAUTIOUS_REPLAN,36,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,perception-risk recovery
+fusion,baseline_scan_depth_goal,test,CAUTIOUS_REPLAN,32,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,NORTH->WEST|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,perception-risk recovery
+depth,baseline_depth_goal,test,CAUTIOUS_REPLAN,30,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,perception-risk recovery
+depth,baseline_depth_goal,test,REPLAN,30,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+fusion,baseline_scan_depth_goal,test,REPLAN,28,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|SOUTH->WEST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+scan,baseline_scan_goal,test,REPLAN,27,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+fusion,class_weighted_focal_scan_depth_goal,test,REPLAN,16,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+scan,class_weighted_focal_scan_goal,test,REPLAN,13,blocked_path_high_conf_direction_error,external_path_blockage,WEST->NORTH|WEST->SOUTH,path-blockage recovery
+fusion,baseline_scan_depth_goal,test,CAUTIOUS_MODE,3,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+depth,baseline_depth_goal,test,CAUTIOUS_MODE,2,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+scan,baseline_scan_goal,test,CAUTIOUS_MODE,2,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+fusion,baseline_scan_depth_goal,test,HUMAN_REVIEW,1,geometric_policy_residual,nominal,SOUTH->EAST,unclassified residual review
+fusion,baseline_scan_depth_goal,train,CAUTIOUS_REPLAN,2,perception_axis_confusion,perception_degradation,EAST->SOUTH|SOUTH->EAST,perception-risk recovery
+scan,baseline_scan_goal,train,CAUTIOUS_REPLAN,2,perception_axis_confusion,perception_degradation,SOUTH->EAST,perception-risk recovery
+depth,baseline_depth_goal,train,HUMAN_REVIEW,1,geometric_policy_residual,nominal,EAST->SOUTH,unclassified residual review
+depth,baseline_depth_goal,train,REPLAN,1,blocked_path_high_conf_direction_error,external_path_blockage,WEST->SOUTH,path-blockage recovery
+fusion,baseline_scan_depth_goal,train,REPLAN,1,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST,path-blockage recovery
+fusion,class_weighted_focal_scan_depth_goal,train,CAUTIOUS_REPLAN,1,perception_axis_confusion,perception_degradation,SOUTH->EAST,perception-risk recovery
+fusion,class_weighted_focal_scan_depth_goal,train,REPLAN,1,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST,path-blockage recovery
+scan,baseline_scan_goal,train,REPLAN,1,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST,path-blockage recovery
+scan,class_weighted_focal_scan_goal,train,CAUTIOUS_REPLAN,1,perception_axis_confusion,perception_degradation,SOUTH->EAST,perception-risk recovery
+fusion,baseline_scan_depth_goal,val,CAUTIOUS_REPLAN,43,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,EAST->SOUTH|NORTH->WEST|WEST->SOUTH,perception-risk recovery
+scan,baseline_scan_goal,val,CAUTIOUS_REPLAN,27,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,EAST->SOUTH|NORTH->WEST|SOUTH->EAST|WEST->SOUTH,perception-risk recovery
+fusion,baseline_scan_depth_goal,val,REPLAN,23,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+depth,baseline_depth_goal,val,CAUTIOUS_REPLAN,22,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,EAST->SOUTH|WEST->SOUTH,perception-risk recovery
+fusion,baseline_scan_depth_goal,val,HUMAN_REVIEW,21,geometric_policy_residual,nominal,EAST->SOUTH|WEST->SOUTH,unclassified residual review
+scan,baseline_scan_goal,val,REPLAN,19,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+depth,baseline_depth_goal,val,REPLAN,18,blocked_path_high_conf_direction_error,external_path_blockage,EAST->SOUTH|SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+fusion,class_weighted_focal_scan_depth_goal,val,REPLAN,15,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST|WEST->NORTH,path-blockage recovery
+scan,baseline_scan_goal,val,HUMAN_REVIEW,15,geometric_policy_residual,nominal,EAST->SOUTH|SOUTH->EAST|WEST->SOUTH,unclassified residual review
+depth,baseline_depth_goal,val,HUMAN_REVIEW,14,geometric_policy_residual,nominal,EAST->SOUTH|WEST->SOUTH,unclassified residual review
+scan,class_weighted_focal_scan_goal,val,REPLAN,9,blocked_path_high_conf_direction_error,external_path_blockage,SOUTH->EAST|WEST->NORTH|WEST->SOUTH,path-blockage recovery
+fusion,class_weighted_focal_scan_depth_goal,val,CAUTIOUS_REPLAN,8,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,SOUTH->EAST|WEST->SOUTH,perception-risk recovery
+scan,class_weighted_focal_scan_goal,val,CAUTIOUS_REPLAN,8,perception_axis_confusion|perception_lateral_depth_confusion,perception_degradation,EAST->SOUTH|WEST->SOUTH,perception-risk recovery
+scan,class_weighted_focal_scan_goal,val,HUMAN_REVIEW,8,geometric_policy_residual,nominal,WEST->SOUTH,unclassified residual review
+fusion,baseline_scan_depth_goal,val,CAUTIOUS_MODE,2,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+scan,baseline_scan_goal,val,CAUTIOUS_MODE,2,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+depth,baseline_depth_goal,val,CAUTIOUS_MODE,1,boundary_direction_confusion,nominal,NORTH->WEST,boundary uncertainty recovery
+fusion,class_weighted_focal_scan_depth_goal,val,HUMAN_REVIEW,1,geometric_policy_residual,nominal,WEST->SOUTH,unclassified residual review

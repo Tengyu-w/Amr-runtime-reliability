@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# ROS 2 colcon generated workspace artifacts
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Raw/generated experiment artifacts.
+# Curated figures and compact evidence tables live in visualizations/.
+outputs/**
+!outputs/.gitkeep

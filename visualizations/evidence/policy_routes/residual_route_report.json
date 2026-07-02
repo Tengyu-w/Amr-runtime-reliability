@@ -1,0 +1,43 @@
+{
+  "task": "Residual policy mechanism analysis and recovery-route prototype",
+  "inputs": {
+    "scan": {
+      "scores": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_scan_policy_depth_matrix_train_v2\\gazebo_scan_policy_scores.csv",
+      "metrics": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_scan_policy_depth_matrix_train_v2\\gazebo_scan_policy_metrics.csv"
+    },
+    "depth": {
+      "scores": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_depth_policy_formal_train_v2\\gazebo_depth_policy_scores.csv",
+      "metrics": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_depth_policy_formal_train_v2\\gazebo_depth_policy_metrics.csv"
+    },
+    "fusion": {
+      "scores": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_fusion_policy_formal_train_v2\\gazebo_fusion_policy_scores.csv",
+      "metrics": "C:\\Users\\77941\\Desktop\\ecg_uncertainty_project\\AMR-Runtime-Reliability-Demo\\outputs\\gazebo_fusion_policy_formal_train_v2\\gazebo_fusion_policy_metrics.csv"
+    }
+  },
+  "high_confidence_threshold": 0.9,
+  "route_policy": {
+    "perception_*": "CAUTIOUS_REPLAN",
+    "blocked_path_*": "REPLAN",
+    "localization_state_error": "RELOCALIZE",
+    "boundary_direction_confusion": "CAUTIOUS_MODE",
+    "geometric_policy_residual": "HUMAN_REVIEW"
+  },
+  "limitations": [
+    "Simulation-derived evidence only.",
+    "One seed per train/val/test split.",
+    "Recovery routes are prototype labels evaluated on residual errors, not deployed robot actions."
+  ],
+  "outputs": {
+    "unified_scores": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\unified_policy_scores.csv",
+    "modality_ablation_metrics": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\modality_ablation_metrics.csv",
+    "test_ablation_delta": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\test_ablation_delta_vs_scan_baseline.csv",
+    "scenario_error_summary": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\scenario_error_summary.csv",
+    "residual_mechanism_summary": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\residual_mechanism_summary.csv",
+    "high_conf_error_patterns": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\high_conf_error_patterns.csv",
+    "recovery_route_evidence": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\recovery_route_evidence.csv",
+    "recovery_route_coverage": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\recovery_route_coverage.csv",
+    "test_accuracy": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\figures\\test_accuracy_by_modality.png",
+    "test_high_conf": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\figures\\test_high_conf_errors_by_modality.png",
+    "routes": "AMR-Runtime-Reliability-Demo\\outputs\\gazebo_policy_residual_routes_v1\\figures\\test_recovery_route_distribution.png"
+  }
+}

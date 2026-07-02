@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<sdf version="1.10">
+  <world name="reliability_room">
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="floor">
+      <static>true</static>
+      <link name="floor_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12 8 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12 8 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <diffuse>0.45 0.45 0.45 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_left">
+      <static>true</static>
+      <pose>-2.5 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.4 5.5 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 5.5 1.0</size></box></geometry>
+          <material><diffuse>0.25 0.25 0.28 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="shelf_right">
+      <static>true</static>
+      <pose>2.5 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.4 5.5 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 5.5 1.0</size></box></geometry>
+          <material><diffuse>0.25 0.25 0.28 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="dynamic_obstacle_placeholder">
+      <static>false</static>
+      <pose>0 0 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.25</radius><length>0.7</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.25</radius><length>0.7</length></cylinder></geometry>
+          <material><diffuse>0.9 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
