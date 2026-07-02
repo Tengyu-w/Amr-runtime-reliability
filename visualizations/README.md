@@ -15,6 +15,7 @@ Runtime demo
 -> Gazebo/Nav2 recovery executor smoke evidence
 -> supervisor-facing closed-loop recovery story
 -> true Gazebo/Nav2 recovery-success smoke video
+-> 3D Gazebo/Nav2 recovery presentation view
 -> scan/depth/fusion policy ablation
 -> high-confidence residual errors
 -> recovery-route distribution
@@ -163,7 +164,28 @@ Generation code:
 
 - `experiments/generate_gazebo_recovery_success_video.py`
 
-## 9. Policy Accuracy By Modality
+## 9. 3D Gazebo/Nav2 Recovery Presentation View
+
+This GIF is the most visual version of the recovery-success smoke run. It
+reconstructs a 3D scene from the same ROS 2/Gazebo/Nav2 logs: AMR body,
+warehouse shelves, dynamic obstacle, lidar rays, depth camera grid, `REPLAN`
+markers, and Nav2 goal-success evidence.
+
+It is not a raw Gazebo GUI screen recording. It is a 3D presentation rendering
+driven by the real recovery run logs.
+
+![3D Gazebo Nav2 recovery success](gazebo_closed_loop/gazebo_nav2_recovery_success_3d.gif)
+
+Source evidence:
+
+- `gazebo_closed_loop/gazebo_nav2_recovery_success_3d_summary.csv`
+- `gazebo_closed_loop/gazebo_nav2_recovery_success_3d_manifest.csv`
+
+Generation code:
+
+- `experiments/generate_gazebo_recovery_3d_video.py`
+
+## 10. Policy Accuracy By Modality
 
 This figure summarizes the held-out test accuracy for the policy variants. The
 comparison includes scan-only, depth-only, and scan+depth fusion policies.
@@ -182,7 +204,7 @@ Generation code:
 - `experiments/train_gazebo_fusion_policy.py`
 - `experiments/analyze_policy_residual_routes.py`
 
-## 10. High-Confidence Policy Errors
+## 11. High-Confidence Policy Errors
 
 This figure focuses on the residual errors that matter most for reliability:
 cases where the learned policy is wrong while still confident. These errors are
@@ -196,7 +218,7 @@ Source evidence:
 - `evidence/policy_routes/residual_mechanism_summary.csv`
 - `evidence/policy_routes/scenario_error_summary.csv`
 
-## 11. Recovery Route Distribution
+## 12. Recovery Route Distribution
 
 This figure shows how high-confidence residual errors are assigned to recovery
 families such as `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`,
@@ -234,4 +256,4 @@ These figures are simulation-grounded evidence, not real-robot validation. The
 formal Gazebo/Nav2 matrix currently uses one held-out test seed in the main
 scan/depth/fusion comparison, so the results should be presented as a research
 prototype rather than final statistical proof. The Gazebo/Nav2 recovery-success
-video is one smoke run, not a multi-seed recovery benchmark.
+and 3D videos are one smoke run, not a multi-seed recovery benchmark.

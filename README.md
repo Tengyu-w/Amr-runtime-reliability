@@ -430,12 +430,21 @@ process:
 | 2 | `gazebo_nav2_closed_loop_recovery_execution.gif` | Route decision connected to Nav2-facing executor actions; not yet goal success. |
 | 3 | `closed_loop_recovery_supervisor_story.gif` | Readable lightweight story for supervisors: blockage, diagnosis, `REPLAN`, recovered path, goal reached. |
 | 4 | `gazebo_nav2_recovery_success_episode.gif` | True Gazebo/Nav2 smoke video: lidar, depth, route decision, executor events, and Nav2 goal success. |
+| 5 | `gazebo_nav2_recovery_success_3d.gif` | 3D presentation view reconstructed from Gazebo/Nav2 logs: AMR body, warehouse shelves, obstacle, lidar rays, depth grid, and recovery events. |
 
 ![Closed-loop recovery supervisor story](visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif)
 
 The third video is the clearest mechanism explanation. The fourth video is the
 stronger ROS2/Gazebo evidence because it is reconstructed from real Gazebo/Nav2
 logs rather than the lightweight simulator.
+
+![3D Gazebo Nav2 recovery success](visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_3d.gif)
+
+The fifth video is the easiest one to show visually: it makes the AMR, 3D
+warehouse scene, dynamic obstacle, lidar rays, depth camera grid, `REPLAN`
+markers, and Nav2 goal-success evidence visible in one view. It is a 3D
+reconstruction from real Gazebo/Nav2 logs; a raw Gazebo GUI screen recording
+can be added later if a display/recording environment is available.
 
 ## Claim-To-Evidence Index
 
@@ -451,6 +460,7 @@ logs rather than the lightweight simulator.
 | Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the smoke run recorded 6 published `REPLAN` goal reissues. | `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
 | A recovery story can be visualized end to end for presentation. | The supervisor-facing closed-loop video shows blockage, diagnosis, `REPLAN`, replanned route, and goal reached in the lightweight simulator. | `visualizations/recovery_route/closed_loop_recovery_supervisor_story.gif`, `visualizations/recovery_route/supervisor_recovery_story_manifest.csv` |
 | One ROS2/Gazebo closed-loop recovery smoke run reaches goal success. | The near-goal external-blockage episode recorded 5 published `REPLAN` goal reissues, 16 new paths to controller, 4 Nav2 goal-succeeded messages, and 0 planner failures. | `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_episode.gif`, `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_summary.csv` |
+| The Gazebo/Nav2 recovery run can be presented as a 3D scene. | A 3D visualization reconstructs the AMR body, shelves, obstacle, lidar rays, depth grid, and recovery markers from the same Gazebo/Nav2 logs. | `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_3d.gif`, `visualizations/gazebo_closed_loop/gazebo_nav2_recovery_success_3d_summary.csv` |
 
 ## Repository Map
 
@@ -533,6 +543,8 @@ The repository shows that:
   Gazebo/Nav2 smoke run;
 - one near-goal external-blockage Gazebo/Nav2 recovery smoke run reports Nav2
   goal success with lidar and depth logs;
+- the recovery-success smoke run can be visualized in 3D with the AMR body,
+  obstacle, lidar rays, depth grid, and recovery markers;
 - the recovery process can be shown as a readable closed-loop presentation
   video in the lightweight simulator.
 
@@ -571,4 +583,6 @@ run into a benchmark:
   not a statistically robust benchmark.
 - The supervisor-facing recovery video is a clear lightweight closed-loop
   demonstration, not a full Gazebo/Nav2 success benchmark.
+- The 3D video is reconstructed from Gazebo/Nav2 logs; it is not a raw Gazebo
+  GUI screen recording.
 - Hardware-facing robot control is outside the scope of this repository.
