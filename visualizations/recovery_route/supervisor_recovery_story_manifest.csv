@@ -1,2 +1,0 @@
-artifact,frames,scenario,triggered_route,evidence_level,description
-closed_loop_recovery_supervisor_story.gif,31,external_path_blockage,REPLAN,readable lightweight closed-loop recovery demo,"Supervisor-facing video showing original policy route, external blockage, mechanism diagnosis, REPLAN execution, recovered route, and goal reached."

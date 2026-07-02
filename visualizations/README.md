@@ -11,11 +11,8 @@ GitHub project page or supervisor presentation.
 Runtime demo
 -> risk supervision
 -> baseline comparison
--> closed-loop recovery-route demonstration
--> supervisor-facing closed-loop recovery story
 -> 3D recovery mechanism demo
 -> true Gazebo/Nav2 recovery-success validation video
--> 3D Gazebo/Nav2 recovery presentation view
 -> scan/depth/fusion policy ablation
 -> high-confidence residual errors
 -> recovery-route distribution
@@ -81,48 +78,7 @@ Generation code:
 
 - `experiments/generate_sensor_policy_visualizations.py`
 
-## 5. Closed-Loop Recovery Route Playback
-
-This GIF shows the recovery route concept that links the router to robot motion:
-the original route becomes blocked, a lidar-style ray detects the blockage, the
-router triggers `REPLAN`, and the AMR follows a new route back toward the goal.
-
-This is a conceptual closed-loop playback generated from the lightweight
-warehouse environment. It is not a Gazebo/Nav2 closed-loop recovery execution
-recording.
-
-![Closed-loop replan recovery demo](recovery_route/closed_loop_replan_recovery_demo.gif)
-
-Source manifest:
-
-- `recovery_route/recovery_route_visualization_manifest.csv`
-
-Generation code:
-
-- `experiments/generate_recovery_route_demo.py`
-
-## 6. Supervisor-Facing Closed-Loop Recovery Story
-
-This is the short video intended for a quick supervisor presentation. It shows
-the research process in one readable sequence: original policy route, external
-blockage, failure-mechanism diagnosis, `REPLAN`, executor action, replanned
-route, and goal reached.
-
-It is generated from the lightweight warehouse closed-loop simulator so the
-mechanism is visually clear. The Gazebo/Nav2 recovery-success videos below
-show the same route idea connected to the ROS 2 / Gazebo / Nav2 stack.
-
-![Closed-loop recovery supervisor story](recovery_route/closed_loop_recovery_supervisor_story.gif)
-
-Source evidence:
-
-- `recovery_route/supervisor_recovery_story_manifest.csv`
-
-Generation code:
-
-- `experiments/generate_supervisor_recovery_story_video.py`
-
-## 7. 3D Recovery Mechanism Demo
+## 5. 3D Recovery Mechanism Demo
 
 This is the clearest recovery-story video. It uses the lightweight warehouse
 closed-loop simulator to show the behavior expected from a physical blockage
@@ -142,7 +98,7 @@ Generation code:
 
 - `experiments/generate_recovery_mechanism_3d_video.py`
 
-## 8. True Gazebo/Nav2 Recovery-Success Validation Video
+## 6. True Gazebo/Nav2 Recovery-Success Validation Video
 
 This GIF is reconstructed from a real headless Gazebo/Nav2 run, not from the
 lightweight grid simulator. It shows Gazebo odometry, LiDAR scan bins, depth
@@ -162,30 +118,7 @@ Generation code:
 
 - `experiments/generate_gazebo_recovery_success_video.py`
 
-## 9. 3D Gazebo/Nav2 Recovery Presentation View
-
-This GIF is the most visual version of the recovery-success validation run. It
-reconstructs a 3D scene from the same ROS 2/Gazebo/Nav2 logs: scaled AMR body,
-warehouse shelf boundaries, visualized injected blockage signal, lidar rays, depth camera grid, `REPLAN`
-markers, and Nav2 goal-success evidence.
-
-It is not a raw Gazebo GUI screen recording. It is a 3D presentation rendering
-driven by the real recovery run logs.
-The red blockage volume visualizes the injected path-blockage signal; it is not
-a Gazebo collision model.
-
-![3D Gazebo Nav2 recovery success](gazebo_closed_loop/gazebo_nav2_recovery_success_3d.gif)
-
-Source evidence:
-
-- `gazebo_closed_loop/gazebo_nav2_recovery_success_3d_summary.csv`
-- `gazebo_closed_loop/gazebo_nav2_recovery_success_3d_manifest.csv`
-
-Generation code:
-
-- `experiments/generate_gazebo_recovery_3d_video.py`
-
-## 10. Policy Accuracy By Modality
+## 7. Policy Accuracy By Modality
 
 This figure summarizes the held-out test accuracy for the policy variants. The
 comparison includes scan-only, depth-only, and scan+depth fusion policies.
@@ -204,7 +137,7 @@ Generation code:
 - `experiments/train_gazebo_fusion_policy.py`
 - `experiments/analyze_policy_residual_routes.py`
 
-## 11. High-Confidence Policy Errors
+## 8. High-Confidence Policy Errors
 
 This figure focuses on the residual errors that matter most for reliability:
 cases where the learned policy is wrong while still confident. These errors are
@@ -218,7 +151,7 @@ Source evidence:
 - `evidence/policy_routes/residual_mechanism_summary.csv`
 - `evidence/policy_routes/scenario_error_summary.csv`
 
-## 12. Recovery Route Distribution
+## 9. Recovery Route Distribution
 
 This figure shows how high-confidence residual errors are assigned to recovery
 families such as `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`,

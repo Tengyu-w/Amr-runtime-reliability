@@ -1,2 +1,0 @@
-artifact,frames,source_dir,description,evidence_level
-gazebo_nav2_recovery_success_3d.gif,83,outputs\gazebo_recovery_long_goal_check,"3D presentation video reconstructed from real ROS 2/Gazebo/Nav2 logs: scaled AMR odometry, lidar rays, depth grid, route decisions, recovery executor, Nav2 goal success, and a visualized injected path-blockage signal.",3D Gazebo/Nav2 recovery-success validation visualization
