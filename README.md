@@ -383,7 +383,8 @@ Generation code:
 ## 9. Gazebo/Nav2 Recovery Executor: Turning Routes Into Actions
 
 The project now includes the first execution layer for a true Gazebo/Nav2
-closed-loop recovery demo:
+closed-loop recovery demo, plus a headless Gazebo/Nav2 smoke run showing that
+the route events reach Nav2-facing recovery actions:
 
 ```text
 /amr_reliability/router_decision
@@ -404,10 +405,31 @@ does not bypass Nav2. Instead:
 | `HUMAN_REVIEW` | Records the operator-review route. | Logged only. |
 | `SAFE_STOP` | Records the stop route for a downstream controller. | Logged only. |
 
+Smoke-run evidence:
+
+| Evidence item | Value |
+| --- | ---: |
+| Routed episode rows | 313 |
+| Recovery-executor rows | 303 |
+| Published `REPLAN` goal reissues | 6 |
+| Cooldown skips after recent `REPLAN` | 221 |
+| Waited because Nav2 goal was not available yet | 76 |
+| Nav2 goal preemption messages | 5 |
+| New paths passed to controller | 15 |
+| Planner failures observed | 29 |
+
+![Gazebo Nav2 recovery executor playback](visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_execution.gif)
+
+This evidence supports the narrower claim that mechanism-aware routes can be
+translated into Nav2 actions. It does not yet prove closed-loop recovery
+success to the final goal; the smoke run still contains planner failures and
+therefore becomes the next research target.
+
 Entry points:
 
 - `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py`
 - `ros2_ws/src/amr_reliability_benchmark/launch/nav2_runtime_pipeline.launch.py`
+- `experiments/generate_gazebo_closed_loop_recovery_visualization.py`
 
 Launch flag:
 
@@ -415,10 +437,8 @@ Launch flag:
 enable_recovery_executor:=true
 ```
 
-This is the missing bridge between residual route analysis and closed-loop
-Nav2 recovery. The next validation step is to run a Gazebo episode with this
-flag enabled and render the resulting route-execution log as a true Gazebo/Nav2
-closed-loop recovery video.
+The current bridge uses cooldowns and valid-goal checks so repeated router
+events do not continuously preempt Nav2 before a usable goal exists.
 
 ## Claim-To-Evidence Index
 
@@ -430,7 +450,7 @@ closed-loop recovery video.
 | Simple scan+depth fusion is not enough. | Fusion baseline does not outperform the best single-modality baseline. | `docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md` |
 | Policy errors are structured. | High-confidence residuals concentrate in perception axis confusion and blocked-path direction errors. | `visualizations/evidence/policy_routes/high_conf_error_patterns.csv` |
 | Recovery routes can be mechanism-specific. | Residual mechanisms map to `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, and `HUMAN_REVIEW`. | `visualizations/evidence/policy_routes/recovery_route_evidence.csv` |
-| Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`. | `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py` |
+| Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`; the Gazebo/Nav2 smoke run recorded 6 published `REPLAN` goal reissues. | `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py`, `visualizations/gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv` |
 
 ## Repository Map
 
@@ -513,33 +533,33 @@ The repository shows that:
 - scan and depth observations can train navigation-action policies;
 - depth improves several held-out reliability metrics in the current matrix;
 - policy residual errors are structured by disturbance type;
-- different residual mechanisms can be routed to different recovery families.
+- different residual mechanisms can be routed to different recovery families;
+- the `REPLAN` recovery route can be executed as Nav2 goal reissues in a
+  headless Gazebo/Nav2 smoke run.
 
 ## What Remains Unproven
 
 The repository does not yet prove:
 
 - real-world AMR safety;
-- closed-loop recovery success after a route is triggered;
+- stable closed-loop goal-reaching success after a route is triggered;
 - statistical robustness beyond the current limited seed matrix;
 - a final best multimodal fusion architecture;
 - full relocalization performance under expanded localization-drift episodes.
-- a recorded full Gazebo/Nav2 closed-loop recovery video with the executor
-  enabled.
 
 ## Recommended Next Experiment
 
-The next experiment should evaluate the route selector itself:
+The next experiment should turn the executor smoke test into a recovery-success
+benchmark:
 
-1. Add localization-drift episodes to the formal scan/depth matrix.
-2. Implement a route selector that predicts `CAUTIOUS_REPLAN`, `REPLAN`,
-   `RELOCALIZE`, `CAUTIOUS_MODE`, or `HUMAN_REVIEW`.
-3. Measure how many high-confidence policy errors it captures.
-4. Measure how often it over-routes correct policy decisions.
+1. Run multiple `external_path_blockage`, `progress_blockage`, and
+   `boundary_weak_blockage` Gazebo/Nav2 seeds with `enable_recovery_executor`.
+2. Tune recovery timing, cooldowns, and goal handoff so REPLAN does not
+   destabilize Nav2 through repeated preemption.
+3. Measure goal success, time-to-recover, planner failures, and over-routing.
+4. Add localization-drift episodes to validate the `RELOCALIZE` branch.
 5. Compare rule-based, learned, uncertainty-threshold, and mechanism-aware
    gated-fusion route selectors.
-6. Run `enable_recovery_executor:=true` in Gazebo/Nav2 and render the resulting
-   recovery episode as the first true closed-loop recovery video.
 
 ## Limitations
 

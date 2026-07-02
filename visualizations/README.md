@@ -12,6 +12,7 @@ Runtime demo
 -> risk supervision
 -> baseline comparison
 -> closed-loop recovery-route demonstration
+-> Gazebo/Nav2 recovery executor smoke evidence
 -> scan/depth/fusion policy ablation
 -> high-confidence residual errors
 -> recovery-route distribution
@@ -97,7 +98,29 @@ Generation code:
 
 - `experiments/generate_recovery_route_demo.py`
 
-## 6. Policy Accuracy By Modality
+## 6. Gazebo/Nav2 Recovery Executor Playback
+
+This GIF is reconstructed from a headless Gazebo/Nav2 run with
+`enable_recovery_executor:=true`. It shows the actual route decisions,
+recovery-executor events, lidar bins, odom trace, and Nav2 stdout evidence
+from the smoke episode.
+
+The supported claim is narrower than the conceptual GIF above: route decisions
+are now connected to Nav2-facing recovery actions. The smoke run does not yet
+prove successful goal-reaching after recovery.
+
+![Gazebo Nav2 recovery executor playback](gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_execution.gif)
+
+Source evidence:
+
+- `gazebo_closed_loop/gazebo_nav2_closed_loop_recovery_summary.csv`
+- `gazebo_closed_loop/gazebo_closed_loop_visualization_manifest.csv`
+
+Generation code:
+
+- `experiments/generate_gazebo_closed_loop_recovery_visualization.py`
+
+## 7. Policy Accuracy By Modality
 
 This figure summarizes the held-out test accuracy for the policy variants. The
 comparison includes scan-only, depth-only, and scan+depth fusion policies.
@@ -116,7 +139,7 @@ Generation code:
 - `experiments/train_gazebo_fusion_policy.py`
 - `experiments/analyze_policy_residual_routes.py`
 
-## 7. High-Confidence Policy Errors
+## 8. High-Confidence Policy Errors
 
 This figure focuses on the residual errors that matter most for reliability:
 cases where the learned policy is wrong while still confident. These errors are
@@ -130,7 +153,7 @@ Source evidence:
 - `evidence/policy_routes/residual_mechanism_summary.csv`
 - `evidence/policy_routes/scenario_error_summary.csv`
 
-## 8. Recovery Route Distribution
+## 9. Recovery Route Distribution
 
 This figure shows how high-confidence residual errors are assigned to recovery
 families such as `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`,

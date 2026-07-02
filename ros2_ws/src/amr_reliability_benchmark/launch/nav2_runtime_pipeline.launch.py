@@ -15,6 +15,8 @@ def generate_launch_description():
     enable_scan_policy_observation_recorder = LaunchConfiguration("enable_scan_policy_observation_recorder")
     enable_depth_policy_observation_recorder = LaunchConfiguration("enable_depth_policy_observation_recorder")
     enable_recovery_executor = LaunchConfiguration("enable_recovery_executor")
+    replan_cooldown_steps = LaunchConfiguration("replan_cooldown_steps")
+    relocalize_cooldown_steps = LaunchConfiguration("relocalize_cooldown_steps")
     goal_initial_delay_sec = LaunchConfiguration("goal_initial_delay_sec")
     goal_x = LaunchConfiguration("goal_x")
     goal_y = LaunchConfiguration("goal_y")
@@ -89,6 +91,16 @@ def generate_launch_description():
                 "enable_recovery_executor",
                 default_value="false",
                 description="Translate router decisions into Nav2-facing recovery actions for closed-loop demos.",
+            ),
+            DeclareLaunchArgument(
+                "replan_cooldown_steps",
+                default_value="20",
+                description="Minimum routed time steps between Nav2 goal reissue recovery actions.",
+            ),
+            DeclareLaunchArgument(
+                "relocalize_cooldown_steps",
+                default_value="8",
+                description="Minimum routed time steps between /initialpose relocalization recovery actions.",
             ),
             DeclareLaunchArgument(
                 "scan_policy_output_path",
@@ -210,7 +222,13 @@ def generate_launch_description():
                 executable="recovery_executor",
                 name="recovery_executor",
                 output="screen",
-                parameters=[{"output_path": recovery_output_path}],
+                parameters=[
+                    {
+                        "output_path": recovery_output_path,
+                        "replan_cooldown_steps": replan_cooldown_steps,
+                        "relocalize_cooldown_steps": relocalize_cooldown_steps,
+                    }
+                ],
             ),
             Node(
                 condition=IfCondition(enable_policy_monitor),

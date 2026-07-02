@@ -38,7 +38,7 @@ class RecoveryExecutor(Node):
         super().__init__("recovery_executor")
         self.declare_parameter("frame_id", "map")
         self.declare_parameter("output_path", "outputs/ros2_episode_logs/recovery_execution.csv")
-        self.declare_parameter("replan_cooldown_steps", 4)
+        self.declare_parameter("replan_cooldown_steps", 20)
         self.declare_parameter("relocalize_cooldown_steps", 8)
 
         self._frame_id = str(self.get_parameter("frame_id").value)
@@ -106,6 +106,14 @@ class RecoveryExecutor(Node):
 
     def _execute_replan(self, payload: dict[str, object], time_step: int) -> dict[str, object]:
         goal = self._goal_from_payload(payload)
+        if goal is None:
+            return self._event(
+                payload,
+                "WAIT_FOR_VALID_GOAL",
+                None,
+                "skipped",
+                "REPLAN received before a valid Nav2 goal was available",
+            )
         if time_step - self._last_replan_step < self._replan_cooldown_steps:
             return self._event(
                 payload,
@@ -167,13 +175,14 @@ class RecoveryExecutor(Node):
             "route requires downstream controller or operator handling",
         )
 
-    def _goal_from_payload(self, payload: dict[str, object]) -> tuple[float, float]:
+    def _goal_from_payload(self, payload: dict[str, object]) -> tuple[float, float] | None:
         if self._latest_goal is not None:
             return self._latest_goal
-        return (
-            float(payload.get("target_x", 0.0)),
-            float(payload.get("target_y", 0.0)),
-        )
+        target_x = float(payload.get("target_x", 0.0))
+        target_y = float(payload.get("target_y", 0.0))
+        if abs(target_x) + abs(target_y) <= 1e-6:
+            return None
+        return (target_x, target_y)
 
     def _publish_goal(self, goal: tuple[float, float]) -> None:
         msg = PoseStamped()
@@ -200,7 +209,7 @@ class RecoveryExecutor(Node):
         self,
         payload: dict[str, object],
         executor_action: str,
-        goal: tuple[float, float],
+        goal: tuple[float, float] | None,
         result: str,
         note: str,
     ) -> dict[str, object]:
@@ -213,8 +222,8 @@ class RecoveryExecutor(Node):
             "executor_action": executor_action,
             "robot_x": payload.get("robot_x", 0.0),
             "robot_y": payload.get("robot_y", 0.0),
-            "goal_x": goal[0],
-            "goal_y": goal[1],
+            "goal_x": "" if goal is None else goal[0],
+            "goal_y": "" if goal is None else goal[1],
             "result": result,
             "note": note,
         }

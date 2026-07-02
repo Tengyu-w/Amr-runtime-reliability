@@ -11,14 +11,22 @@ def generate_launch_description():
     scenario_id = LaunchConfiguration("scenario_id")
     episode_id = LaunchConfiguration("episode_id")
     output_path = LaunchConfiguration("output_path")
+    recovery_output_path = LaunchConfiguration("recovery_output_path")
+    enable_recovery_executor = LaunchConfiguration("enable_recovery_executor")
+    replan_cooldown_steps = LaunchConfiguration("replan_cooldown_steps")
+    relocalize_cooldown_steps = LaunchConfiguration("relocalize_cooldown_steps")
     policy_model_path = LaunchConfiguration("policy_model_path")
     policy_output_path = LaunchConfiguration("policy_output_path")
     scan_policy_output_path = LaunchConfiguration("scan_policy_output_path")
     enable_scan_policy_observation_recorder = LaunchConfiguration("enable_scan_policy_observation_recorder")
+    scan_policy_bins = LaunchConfiguration("scan_policy_bins")
     scan_policy_require_nav2_plan = LaunchConfiguration("scan_policy_require_nav2_plan")
     depth_policy_output_path = LaunchConfiguration("depth_policy_output_path")
     enable_depth_policy_observation_recorder = LaunchConfiguration("enable_depth_policy_observation_recorder")
+    depth_policy_grid_rows = LaunchConfiguration("depth_policy_grid_rows")
+    depth_policy_grid_cols = LaunchConfiguration("depth_policy_grid_cols")
     depth_policy_require_nav2_plan = LaunchConfiguration("depth_policy_require_nav2_plan")
+    goal_initial_delay_sec = LaunchConfiguration("goal_initial_delay_sec")
     goal_x = LaunchConfiguration("goal_x")
     goal_y = LaunchConfiguration("goal_y")
     alternate_goal_x = LaunchConfiguration("alternate_goal_x")
@@ -56,6 +64,26 @@ def generate_launch_description():
                 description="CSV output path for routed reliability episode rows.",
             ),
             DeclareLaunchArgument(
+                "recovery_output_path",
+                default_value="outputs/ros2_episode_logs/gazebo_nav2_recovery_execution.csv",
+                description="CSV output path for recovery executor events.",
+            ),
+            DeclareLaunchArgument(
+                "enable_recovery_executor",
+                default_value="false",
+                description="Enable route-to-Nav2 recovery execution bridge.",
+            ),
+            DeclareLaunchArgument(
+                "replan_cooldown_steps",
+                default_value="20",
+                description="Minimum routed time steps between Nav2 goal reissue recovery actions.",
+            ),
+            DeclareLaunchArgument(
+                "relocalize_cooldown_steps",
+                default_value="8",
+                description="Minimum routed time steps between /initialpose relocalization recovery actions.",
+            ),
+            DeclareLaunchArgument(
                 "policy_model_path",
                 default_value="",
                 description="JSON export for the navigation-policy monitor. Empty path uses a heuristic probe.",
@@ -76,6 +104,11 @@ def generate_launch_description():
                 description="Record /scan observations aligned with expert policy labels.",
             ),
             DeclareLaunchArgument(
+                "scan_policy_bins",
+                default_value="72",
+                description="Number of downsampled LaserScan bins to record as policy observations.",
+            ),
+            DeclareLaunchArgument(
                 "depth_policy_output_path",
                 default_value="outputs/ros2_episode_logs/gazebo_nav2_depth_policy_observations.csv",
                 description="CSV output path for depth observations aligned with expert policy labels.",
@@ -84,6 +117,16 @@ def generate_launch_description():
                 "enable_depth_policy_observation_recorder",
                 default_value="true",
                 description="Record depth observations aligned with expert policy labels.",
+            ),
+            DeclareLaunchArgument(
+                "depth_policy_grid_rows",
+                default_value="8",
+                description="Rows in the downsampled depth-image observation grid.",
+            ),
+            DeclareLaunchArgument(
+                "depth_policy_grid_cols",
+                default_value="12",
+                description="Columns in the downsampled depth-image observation grid.",
             ),
             DeclareLaunchArgument(
                 "scan_policy_require_nav2_plan",
@@ -100,6 +143,11 @@ def generate_launch_description():
             DeclareLaunchArgument("alternate_goal_x", default_value="-4.5", description="Alternate Nav2 goal x coordinate."),
             DeclareLaunchArgument("alternate_goal_y", default_value="3.0", description="Alternate Nav2 goal y coordinate."),
             DeclareLaunchArgument("goal_shift_step", default_value="6", description="Scenario step that triggers alternate goal use."),
+            DeclareLaunchArgument(
+                "goal_initial_delay_sec",
+                default_value="35.0",
+                description="Delay before publishing the first Nav2 goal.",
+            ),
             DeclareLaunchArgument(
                 "fault_seed",
                 default_value="17",
@@ -204,14 +252,22 @@ def generate_launch_description():
                             "scenario_id": scenario_id,
                             "episode_id": episode_id,
                             "output_path": output_path,
+                            "recovery_output_path": recovery_output_path,
+                            "enable_recovery_executor": enable_recovery_executor,
+                            "replan_cooldown_steps": replan_cooldown_steps,
+                            "relocalize_cooldown_steps": relocalize_cooldown_steps,
                             "policy_model_path": policy_model_path,
                             "policy_output_path": policy_output_path,
                             "scan_policy_output_path": scan_policy_output_path,
                             "depth_policy_output_path": depth_policy_output_path,
                             "enable_scan_policy_observation_recorder": enable_scan_policy_observation_recorder,
                             "enable_depth_policy_observation_recorder": enable_depth_policy_observation_recorder,
+                            "scan_policy_bins": scan_policy_bins,
                             "scan_policy_require_nav2_plan": scan_policy_require_nav2_plan,
+                            "depth_policy_grid_rows": depth_policy_grid_rows,
+                            "depth_policy_grid_cols": depth_policy_grid_cols,
                             "depth_policy_require_nav2_plan": depth_policy_require_nav2_plan,
+                            "goal_initial_delay_sec": goal_initial_delay_sec,
                             "goal_x": goal_x,
                             "goal_y": goal_y,
                             "alternate_goal_x": alternate_goal_x,

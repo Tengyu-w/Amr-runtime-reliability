@@ -1,0 +1,2 @@
+artifact,frames,source_dir,description,evidence_level
+gazebo_nav2_closed_loop_recovery_execution.gif,63,outputs\gazebo_closed_loop_executor_smoke_v2,"Log-derived Gazebo/Nav2 playback showing router decisions, recovery executor events, lidar bins, and Nav2 stdout evidence.",execution bridge smoke test; not final recovery-success benchmark

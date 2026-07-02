@@ -46,6 +46,8 @@ def test_nav2_bringup_resources_are_present() -> None:
 def test_recovery_executor_is_registered_and_launchable() -> None:
     setup_py = ROS_PACKAGE / "setup.py"
     launch_py = ROS_PACKAGE / "launch" / "nav2_runtime_pipeline.launch.py"
+    bringup_launch_py = ROS_PACKAGE / "launch" / "amr_nav2_bringup.launch.py"
+    gazebo_launch_py = ROS_PACKAGE / "launch" / "gazebo_nav2_benchmark.launch.py"
     executor_py = ROS_PACKAGE / "amr_reliability_benchmark" / "recovery_executor.py"
 
     assert executor_py.exists()
@@ -54,8 +56,19 @@ def test_recovery_executor_is_registered_and_launchable() -> None:
     )
     launch_text = launch_py.read_text(encoding="utf-8")
     assert "enable_recovery_executor" in launch_text
+    assert "replan_cooldown_steps" in launch_text
+    assert "relocalize_cooldown_steps" in launch_text
     assert "nav2_runtime_recovery_execution.csv" in launch_text
     assert 'executable="recovery_executor"' in launch_text
+    bringup_text = bringup_launch_py.read_text(encoding="utf-8")
+    gazebo_text = gazebo_launch_py.read_text(encoding="utf-8")
+    assert "enable_recovery_executor" in bringup_text
+    assert "policy_output_path" in bringup_text
+    assert "goal_initial_delay_sec" in bringup_text
+    assert "enable_recovery_executor" in gazebo_text
+    assert "replan_cooldown_steps" in gazebo_text
+    assert "goal_initial_delay_sec" in gazebo_text
+    assert "gazebo_nav2_recovery_execution.csv" in gazebo_text
 
 
 def test_replay_metrics_drive_distinct_recovery_routes() -> None:
