@@ -11,6 +11,7 @@ GitHub project page or supervisor presentation.
 Runtime demo
 -> risk supervision
 -> baseline comparison
+-> closed-loop recovery-route demonstration
 -> scan/depth/fusion policy ablation
 -> high-confidence residual errors
 -> recovery-route distribution
@@ -76,7 +77,27 @@ Generation code:
 
 - `experiments/generate_sensor_policy_visualizations.py`
 
-## 5. Policy Accuracy By Modality
+## 5. Closed-Loop Recovery Route Playback
+
+This GIF shows the recovery route concept that links the router to robot motion:
+the original route becomes blocked, a lidar-style ray detects the blockage, the
+router triggers `REPLAN`, and the AMR follows a new route back toward the goal.
+
+This is a conceptual closed-loop playback generated from the lightweight
+warehouse environment. It is not a Gazebo/Nav2 closed-loop recovery execution
+recording.
+
+![Closed-loop replan recovery demo](recovery_route/closed_loop_replan_recovery_demo.gif)
+
+Source manifest:
+
+- `recovery_route/recovery_route_visualization_manifest.csv`
+
+Generation code:
+
+- `experiments/generate_recovery_route_demo.py`
+
+## 6. Policy Accuracy By Modality
 
 This figure summarizes the held-out test accuracy for the policy variants. The
 comparison includes scan-only, depth-only, and scan+depth fusion policies.
@@ -95,7 +116,7 @@ Generation code:
 - `experiments/train_gazebo_fusion_policy.py`
 - `experiments/analyze_policy_residual_routes.py`
 
-## 6. High-Confidence Policy Errors
+## 7. High-Confidence Policy Errors
 
 This figure focuses on the residual errors that matter most for reliability:
 cases where the learned policy is wrong while still confident. These errors are
@@ -109,7 +130,7 @@ Source evidence:
 - `evidence/policy_routes/residual_mechanism_summary.csv`
 - `evidence/policy_routes/scenario_error_summary.csv`
 
-## 7. Recovery Route Distribution
+## 8. Recovery Route Distribution
 
 This figure shows how high-confidence residual errors are assigned to recovery
 families such as `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`,

@@ -111,6 +111,10 @@ The repository follows a mechanism-first sequence:
    -> map different residual mechanisms to different recovery families such as
       cautious replanning, replanning, relocalization, cautious mode, and human
       review
+
+8. Closed-loop recovery visualization
+   -> show the route concept visually: original route blocked, lidar-style
+      detection, `REPLAN`, and return to a safe path
 ```
 
 The contribution is therefore the **policy-residual-to-recovery-route evidence
@@ -345,6 +349,34 @@ Evidence tables:
 - [recovery_route_evidence.csv](visualizations/evidence/policy_routes/recovery_route_evidence.csv)
 - [recovery_route_coverage.csv](visualizations/evidence/policy_routes/recovery_route_coverage.csv)
 - [residual_route_report.json](visualizations/evidence/policy_routes/residual_route_report.json)
+
+## 8. Closed-Loop Recovery Visualization: Wrong Route To Correct Route
+
+The repository includes a recovery-route playback that shows the behavior you
+would expect from the router layer:
+
+```text
+original route
+  -> external blockage appears
+  -> lidar-style ray detects the blockage
+  -> policy route is unsafe
+  -> router triggers REPLAN
+  -> AMR follows a new route back toward the goal
+```
+
+![Closed-loop replan recovery demo](visualizations/recovery_route/closed_loop_replan_recovery_demo.gif)
+
+This is a conceptual closed-loop visualization generated from the lightweight
+warehouse environment. It demonstrates the recovery route mechanism visually,
+but it is not yet a full Gazebo/Nav2 closed-loop recovery execution video.
+
+Source manifest:
+
+- [recovery_route_visualization_manifest.csv](visualizations/recovery_route/recovery_route_visualization_manifest.csv)
+
+Generation code:
+
+- `experiments/generate_recovery_route_demo.py`
 
 ## Claim-To-Evidence Index
 

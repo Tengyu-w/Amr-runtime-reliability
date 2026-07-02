@@ -1,0 +1,2 @@
+artifact,frames,scenario,triggered_route,description
+closed_loop_replan_recovery_demo.gif,25,external_path_blockage,REPLAN,"Conceptual closed-loop playback showing a blocked original route, lidar-style detection, mechanism-aware REPLAN, and return to a safe path."
