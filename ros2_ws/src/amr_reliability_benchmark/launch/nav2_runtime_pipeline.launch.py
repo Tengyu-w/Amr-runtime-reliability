@@ -14,6 +14,7 @@ def generate_launch_description():
     enable_policy_monitor = LaunchConfiguration("enable_policy_monitor")
     enable_scan_policy_observation_recorder = LaunchConfiguration("enable_scan_policy_observation_recorder")
     enable_depth_policy_observation_recorder = LaunchConfiguration("enable_depth_policy_observation_recorder")
+    enable_recovery_executor = LaunchConfiguration("enable_recovery_executor")
     goal_initial_delay_sec = LaunchConfiguration("goal_initial_delay_sec")
     goal_x = LaunchConfiguration("goal_x")
     goal_y = LaunchConfiguration("goal_y")
@@ -21,6 +22,7 @@ def generate_launch_description():
     alternate_goal_y = LaunchConfiguration("alternate_goal_y")
     goal_shift_step = LaunchConfiguration("goal_shift_step")
     output_path = LaunchConfiguration("output_path")
+    recovery_output_path = LaunchConfiguration("recovery_output_path")
     policy_model_path = LaunchConfiguration("policy_model_path")
     policy_output_path = LaunchConfiguration("policy_output_path")
     scan_policy_output_path = LaunchConfiguration("scan_policy_output_path")
@@ -84,6 +86,11 @@ def generate_launch_description():
                 description="Record depth images aligned with Nav2-plan expert policy labels.",
             ),
             DeclareLaunchArgument(
+                "enable_recovery_executor",
+                default_value="false",
+                description="Translate router decisions into Nav2-facing recovery actions for closed-loop demos.",
+            ),
+            DeclareLaunchArgument(
                 "scan_policy_output_path",
                 default_value="outputs/ros2_episode_logs/nav2_runtime_scan_policy_observations.csv",
                 description="CSV path for scan-observation policy training rows.",
@@ -132,6 +139,11 @@ def generate_launch_description():
                 "output_path",
                 default_value="outputs/ros2_episode_logs/nav2_runtime_episode.csv",
                 description="CSV path for routed episode rows.",
+            ),
+            DeclareLaunchArgument(
+                "recovery_output_path",
+                default_value="outputs/ros2_episode_logs/nav2_runtime_recovery_execution.csv",
+                description="CSV path for recovery executor events.",
             ),
             Node(
                 package="amr_reliability_benchmark",
@@ -191,6 +203,14 @@ def generate_launch_description():
                 executable="runtime_router",
                 name="runtime_router",
                 output="screen",
+            ),
+            Node(
+                condition=IfCondition(enable_recovery_executor),
+                package="amr_reliability_benchmark",
+                executable="recovery_executor",
+                name="recovery_executor",
+                output="screen",
+                parameters=[{"output_path": recovery_output_path}],
             ),
             Node(
                 condition=IfCondition(enable_policy_monitor),

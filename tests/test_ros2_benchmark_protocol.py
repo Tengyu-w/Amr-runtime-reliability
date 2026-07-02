@@ -43,6 +43,21 @@ def test_nav2_bringup_resources_are_present() -> None:
     assert bringup_launch.exists()
 
 
+def test_recovery_executor_is_registered_and_launchable() -> None:
+    setup_py = ROS_PACKAGE / "setup.py"
+    launch_py = ROS_PACKAGE / "launch" / "nav2_runtime_pipeline.launch.py"
+    executor_py = ROS_PACKAGE / "amr_reliability_benchmark" / "recovery_executor.py"
+
+    assert executor_py.exists()
+    assert "recovery_executor = amr_reliability_benchmark.recovery_executor:main" in setup_py.read_text(
+        encoding="utf-8"
+    )
+    launch_text = launch_py.read_text(encoding="utf-8")
+    assert "enable_recovery_executor" in launch_text
+    assert "nav2_runtime_recovery_execution.csv" in launch_text
+    assert 'executable="recovery_executor"' in launch_text
+
+
 def test_replay_metrics_drive_distinct_recovery_routes() -> None:
     assert route_metrics(replay_metrics_for_scenario("nominal", 0)).value == "NORMAL_NAVIGATION"
     assert route_metrics(replay_metrics_for_scenario("localization_drift", 11)).value == "RELOCALIZE"

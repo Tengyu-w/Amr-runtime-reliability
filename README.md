@@ -62,6 +62,8 @@ prototype:
 - scan-only, depth-only, and scan+depth fusion policy ablations;
 - high-confidence residual error analysis;
 - recovery-route evidence tables and visualizations.
+- a ROS 2 `recovery_executor` node that can translate route decisions into
+  Nav2-facing recovery actions for closed-loop demos.
 
 The formal Gazebo/Nav2 scan-depth matrix completed 36/36 episodes across:
 
@@ -378,6 +380,46 @@ Generation code:
 
 - `experiments/generate_recovery_route_demo.py`
 
+## 9. Gazebo/Nav2 Recovery Executor: Turning Routes Into Actions
+
+The project now includes the first execution layer for a true Gazebo/Nav2
+closed-loop recovery demo:
+
+```text
+/amr_reliability/router_decision
+  -> recovery_executor
+  -> /goal_pose for REPLAN
+  -> /initialpose for RELOCALIZE
+  -> /amr_reliability/recovery_execution event log
+```
+
+The executor is conservative. It does not publish raw velocity commands and
+does not bypass Nav2. Instead:
+
+| Route | Executor behavior | Current status |
+| --- | --- | --- |
+| `REPLAN` | Reissues the current `/goal_pose` so Nav2 can replan against the updated costmap. | Implemented. |
+| `RELOCALIZE` | Publishes a pose estimate to `/initialpose`. | Implemented. |
+| `CAUTIOUS_MODE` | Records the route event for a downstream speed controller. | Logged only. |
+| `HUMAN_REVIEW` | Records the operator-review route. | Logged only. |
+| `SAFE_STOP` | Records the stop route for a downstream controller. | Logged only. |
+
+Entry points:
+
+- `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py`
+- `ros2_ws/src/amr_reliability_benchmark/launch/nav2_runtime_pipeline.launch.py`
+
+Launch flag:
+
+```powershell
+enable_recovery_executor:=true
+```
+
+This is the missing bridge between residual route analysis and closed-loop
+Nav2 recovery. The next validation step is to run a Gazebo episode with this
+flag enabled and render the resulting route-execution log as a true Gazebo/Nav2
+closed-loop recovery video.
+
 ## Claim-To-Evidence Index
 
 | Claim | Evidence | Source |
@@ -388,6 +430,7 @@ Generation code:
 | Simple scan+depth fusion is not enough. | Fusion baseline does not outperform the best single-modality baseline. | `docs/GAZEBO_DEPTH_FUSION_FORMAL_V1_RESULTS.md` |
 | Policy errors are structured. | High-confidence residuals concentrate in perception axis confusion and blocked-path direction errors. | `visualizations/evidence/policy_routes/high_conf_error_patterns.csv` |
 | Recovery routes can be mechanism-specific. | Residual mechanisms map to `CAUTIOUS_REPLAN`, `REPLAN`, `RELOCALIZE`, `CAUTIOUS_MODE`, and `HUMAN_REVIEW`. | `visualizations/evidence/policy_routes/recovery_route_evidence.csv` |
+| Recovery routes can be connected to Nav2-facing actions. | `recovery_executor` translates `REPLAN` into `/goal_pose` reissue and `RELOCALIZE` into `/initialpose`. | `ros2_ws/src/amr_reliability_benchmark/amr_reliability_benchmark/recovery_executor.py` |
 
 ## Repository Map
 
@@ -399,7 +442,8 @@ experiments/
   Dataset generation, Gazebo/Nav2 policy training, ablations, and residual-route analysis
 
 ros2_ws/
-  ROS 2 / Gazebo / Nav2 package, robot model, world, launch files, and recorders
+  ROS 2 / Gazebo / Nav2 package, robot model, world, launch files, recorders,
+  runtime router, and recovery executor
 
 docs/
   Research reports, protocols, formal result summaries, and narrative documents
@@ -480,6 +524,8 @@ The repository does not yet prove:
 - statistical robustness beyond the current limited seed matrix;
 - a final best multimodal fusion architecture;
 - full relocalization performance under expanded localization-drift episodes.
+- a recorded full Gazebo/Nav2 closed-loop recovery video with the executor
+  enabled.
 
 ## Recommended Next Experiment
 
@@ -492,6 +538,8 @@ The next experiment should evaluate the route selector itself:
 4. Measure how often it over-routes correct policy decisions.
 5. Compare rule-based, learned, uncertainty-threshold, and mechanism-aware
    gated-fusion route selectors.
+6. Run `enable_recovery_executor:=true` in Gazebo/Nav2 and render the resulting
+   recovery episode as the first true closed-loop recovery video.
 
 ## Limitations
 

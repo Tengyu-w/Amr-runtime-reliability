@@ -34,6 +34,7 @@ setup(
             "navigation_policy_monitor = amr_reliability_benchmark.navigation_policy_monitor:main",
             "nav2_telemetry_adapter = amr_reliability_benchmark.nav2_telemetry_adapter:main",
             "policy_episode_recorder = amr_reliability_benchmark.policy_episode_recorder:main",
+            "recovery_executor = amr_reliability_benchmark.recovery_executor:main",
             "runtime_router = amr_reliability_benchmark.runtime_router:main",
             "scan_policy_observation_recorder = amr_reliability_benchmark.scan_policy_observation_recorder:main",
             "scenario_catalog = amr_reliability_benchmark.scenario_catalog:main",
